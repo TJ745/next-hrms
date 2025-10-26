@@ -12,6 +12,7 @@ import {
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import SignOutButton from "./SignOutButton";
+import Link from "next/link";
 
 async function AvatarPicture() {
   const headerList = await headers();
@@ -31,11 +32,11 @@ async function AvatarPicture() {
         </DropdownMenuTrigger>
         <DropdownMenuContent sideOffset={10}>
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>{session?.user.name}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuLabel>Name: {session?.user.name}</DropdownMenuLabel>
           <DropdownMenuItem>
             <User className="h-[1.2rem] w-[1.2rem] mr-2" />
-            Profile
+            <Link href={"/profile"}>Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
