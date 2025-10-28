@@ -1,16 +1,30 @@
-import AppSidebar from "@/components/AppSidebar";
 import {
-  DeleteUserButton,
-  PlaceholderDeleteUserButton,
-} from "@/components/DeleteUserButton";
-import Navbar from "@/components/Navbar";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { UserRoleSelect } from "@/components/UserRoleSelect";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  Building2,
+  File,
+  FileMinus,
+  FilePlus,
+  GitBranch,
+  SlashIcon,
+  UserMinus,
+  UserPlus,
+  Users2,
+} from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import React from "react";
+import { columns, Employee } from "./columns";
+import { DataTable } from "./data-table";
+import { ChartPieDonutText } from "@/components/TotalEmployeePieCHart";
+import { ChartLineMultiple } from "@/components/TotalEmployeeLineChart";
 
 async function Dashboard() {
   const session = await auth.api.getSession({
@@ -18,66 +32,164 @@ async function Dashboard() {
   });
 
   if (!session) redirect("/auth/login");
-  if (session.user.role !== "ADMIN") {
-    return (
-      <div className="flex flex-col min-h-screen items-center justify-center text-center bg-gray-100 p-4">
-        <p className="text-red-500">
-          You are not an admin!
-          <br /> Please Log in with Admin Credentials.
-        </p>
-      </div>
-    );
-  }
 
+  // Fetch employees from Prisma
   const users = await prisma.user.findMany({
     orderBy: { name: "asc" },
   });
 
+  // Map to Employee type
+  const employees: Employee[] = users.map((user) => ({
+    id: user.id,
+    name: user.name ?? "N/A",
+    email: user.email,
+    role: user.role as "ADMIN" | "USER",
+  }));
+
   return (
-    // <div className="flex flex-col min-h-screen items-center  p-4">
-    <div>
-      <SidebarProvider>
-        <AppSidebar />
-        <main className="w-full">
-          <Navbar />
-
-          <div className="w-full overflow-x-auto">
-            <table className="table-auto min-w-full whitespace-nowrap">
-              <thead>
-                <tr className="border-b text-sm">
-                  <th className="px-2 py-2">ID</th>
-                  <th className="px-2 py-2">Name</th>
-                  <th className="px-2 py-2">Email</th>
-                  <th className="px-2 py-2">Role</th>
-                  <th className="px-2 py-2">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className="border-b text-sm text-center">
-                    <td className="px-4 py-2">{user.id.slice(0, 8)}</td>
-                    <td className="px-4 py-2">{user.name}</td>
-                    <td className="px-4 py-2">{user.email}</td>
-                    {/* <td className="px-4 py-2">{user.role}</td> */}
-                    <td className="px-4 py-2">
-                      <UserRoleSelect userId={user.id} role={user.role} />
-                    </td>
-                    <td className="px-4 py-2">
-                      {user.role === "USER" ? (
-                        <DeleteUserButton userId={user.id} />
-                      ) : (
-                        <PlaceholderDeleteUserButton />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <main className="w-full">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator>
+            <SlashIcon />
+          </BreadcrumbSeparator>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="w-full overflow-x-auto">
+        <div className="grid grid-cols-4 bg-secondary gap-2 p-2 mt-4 rounded-xl">
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <Users2 size={40} />
+              <h1 className="text-lg font-bold">Total Employees</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">150</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
           </div>
-        </main>
-      </SidebarProvider>
-    </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <File size={40} />
+              <h1 className="text-lg font-bold">Total Leaves</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">5</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <UserPlus size={40} />
+              <h1 className="text-lg font-bold">New Employees</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">10</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <Building2 size={40} />
+              <h1 className="text-lg font-bold">Total Department</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">20</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* 2nd Grid */}
+        <div className="grid grid-cols-4 bg-secondary gap-2 p-2 mt-4 rounded-xl">
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <UserMinus size={40} />
+              <h1 className="text-lg font-bold">Resignations</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">3</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <FileMinus size={40} />
+              <h1 className="text-lg font-bold">Total Absents</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">15</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <FilePlus size={40} />
+              <h1 className="text-lg font-bold">New Jobs</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">10</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
+            <div>
+              <GitBranch size={40} />
+              <h1 className="text-lg font-bold">Total Branches</h1>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h2 className="text-2xl">20</h2>
+              <span className="text-sm bg-accent px-2 py-1 rounded-md">
+                Down
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Pie Chart */}
+        <div className="grid grid-cols-4 gap-4 mt-4">
+          <div className="col-span-1 bg-secondary p-2 rounded-xl">
+            <h1 className="text-xl font-bold">Total Employees</h1>
+            <ChartPieDonutText />
+          </div>
+          <div className="col-span-1 bg-secondary p-2 rounded-xl">
+            <h1 className="text-xl font-bold">Total Departments</h1>
+            <ChartPieDonutText />
+          </div>
+          <div className="col-span-2 bg-secondary p-2 rounded-xl">
+            <h1 className="text-xl font-bold">Team Performance</h1>
+            <ChartLineMultiple />
+          </div>
+        </div>
+
+        {/* Employees */}
+        <div className="mt-4">
+          <div className="bg-secondary p-2 rounded-xl space-y-4">
+            <h1 className="text-xl font-bold">Employees</h1>
+
+            <DataTable columns={columns} data={employees} />
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
 

@@ -22,7 +22,12 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 
-function AppSidebar() {
+interface AppSidebarProps {
+  role: "ADMIN" | "USER" | "MANAGER";
+}
+
+function AppSidebar({ role }: AppSidebarProps) {
+  const items = sidebarMenuItems(role);
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -42,7 +47,7 @@ function AppSidebar() {
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {sidebarMenuItems.map((item) =>
+              {items.map((item) =>
                 item.children ? (
                   <Collapsible key={item.title} className="group/collapsible">
                     <SidebarMenuItem>
@@ -73,7 +78,7 @@ function AppSidebar() {
                           {item.children.map((subItem) => (
                             <SidebarMenuSubItem key={subItem.title}>
                               <Link
-                                href={subItem.url}
+                                href={subItem.url ?? "#"}
                                 className="block px-2 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
                               >
                                 {subItem.title}
@@ -90,7 +95,7 @@ function AppSidebar() {
                       asChild
                       className="gap-4 cursor-pointer uppercase font-semibold"
                     >
-                      <Link href={item.url}>
+                      <Link href={item.url ?? "#"}>
                         <item.icon />
                         <span>{item.title}</span>
                       </Link>

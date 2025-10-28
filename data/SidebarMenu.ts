@@ -1,6 +1,15 @@
-import { Home, Inbox, User } from "lucide-react";
+import { BarChart3, Briefcase, Calendar, Clock, FileText, Home, Inbox, Settings, User, Users } from "lucide-react";
 
-export const sidebarMenuItems = [
+type Role = "ADMIN" | "USER" | "MANAGER";
+
+export interface SidebarProps {
+  title: string;
+  url?: string;
+  icon?: any;
+  children?: SidebarProps[];
+}
+
+export const sidebarMenuItems = (role:Role):SidebarProps[] => [
    {
     title: "Dashboard",
     url: "/dashboard",
@@ -8,30 +17,16 @@ export const sidebarMenuItems = [
   },
   {
     title: "Employees",
-    
-    icon: Home,
+    icon: Users,
     children:[
-{
-    title: "Manage Employees",
-    url: "/",
-    
-  },
-  {
-    title: "Directory",
-    url: "/",
-    
-  },
-  {
-    title: "Organization Chart",
-    url: "/",
-    
-  },
-    ]
+      { title: "Manage Employees", url: "/dashboard",  },
+  { title: "Directory",url: "/",},
+  {title: "Organization Chart", url: "/", },]
   },
   {
     title: "Time Off",
     
-    icon: Home,
+    icon: Calendar,
     children:[
 {
     title: "My Time Off",
@@ -57,7 +52,7 @@ export const sidebarMenuItems = [
   }, {
     title: "Attendance",
     
-    icon: Home,
+    icon: Clock,
     children:[
 {
     title: "My Attendance",
@@ -84,7 +79,7 @@ export const sidebarMenuItems = [
   {
     title: "Payroll",
     
-    icon: Home,
+    icon: FileText,
     children:[
 {
     title: "My Payroll",
@@ -107,7 +102,7 @@ export const sidebarMenuItems = [
   {
     title: "Performance",
     
-    icon: Home,
+    icon: Briefcase,
     children:[
 {
     title: "Jobs",
@@ -130,7 +125,7 @@ export const sidebarMenuItems = [
   {
     title: "Recruitment",
     
-    icon: Home,
+    icon: Users,
     children:[
 {
     title: "Jobs",
@@ -153,7 +148,7 @@ export const sidebarMenuItems = [
   {
     title: "Reports",
     
-    icon: Home,
+    icon: BarChart3,
     children:[
 {
     title: "Jobs",
@@ -173,23 +168,23 @@ export const sidebarMenuItems = [
   },
     ]
   },
-  {
+...(role ==="ADMIN" ? [  {
     title: "Setting",
-    
-    icon: Home,
-    children:[
-    {
-    title: "Jobs",
-    url: "/",
-     },
-     {
-    title: "Candidates",
-    url: "/",
-    },
-    {
-    title: "Settings",
-    url: "/",
-    },
-    ]
-  },
-];
+    url: "dashboard/settings",
+    icon: Settings,
+    // children:[
+    // {
+    // title: "Jobs",
+    // url: "/",
+    //  },
+    //  {
+    // title: "Candidates",
+    // url: "/",
+    // },
+    // {
+    // title: "Settings",
+    // url: "/",
+    // },
+    // ]
+  }] : []),
+]
