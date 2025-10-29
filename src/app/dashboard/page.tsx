@@ -62,7 +62,7 @@ async function Dashboard() {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="w-full overflow-x-auto">
-        <div className="grid grid-cols-4 bg-secondary gap-2 p-2 mt-4 rounded-xl">
+        <div className="grid grid-cols-4  gap-2 p-2 mt-2">
           <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
             <div>
               <Users2 size={40} />
@@ -114,7 +114,7 @@ async function Dashboard() {
         </div>
 
         {/* 2nd Grid */}
-        <div className="grid grid-cols-4 bg-secondary gap-2 p-2 mt-4 rounded-xl">
+        <div className="grid grid-cols-4 gap-2 p-2">
           <div className="col-span-1 bg-primary-foreground rounded-lg flex items-center justify-between p-4">
             <div>
               <UserMinus size={40} />
@@ -164,6 +164,7 @@ async function Dashboard() {
             </div>
           </div>
         </div>
+
         {/* Pie Chart */}
         <div className="grid grid-cols-4 gap-4 mt-4">
           <div className="col-span-1 bg-secondary p-2 rounded-xl">
@@ -182,7 +183,7 @@ async function Dashboard() {
 
         {/* Employees */}
         <div className="mt-4">
-          <div className="bg-secondary p-2 rounded-xl space-y-4">
+          <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
             <h1 className="text-xl font-bold">Employees</h1>
 
             <DataTable columns={columns} data={employees} />

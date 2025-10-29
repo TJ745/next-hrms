@@ -27,7 +27,7 @@ function LoginForm() {
       setIsPending(false);
     } else {
       toast.success("Logged in successfully. Good to have you back.");
-      router.push("/profile");
+      router.push("/dashboard");
     }
   }
 
