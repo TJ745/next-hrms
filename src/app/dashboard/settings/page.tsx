@@ -24,6 +24,7 @@ import {
   Clock,
   LucideBuilding,
   SlashIcon,
+  User,
   UserStar,
 } from "lucide-react";
 import React from "react";
@@ -37,6 +38,9 @@ import { Department } from "./departments/columns";
 import { DepartmentTable } from "./departments/data-table";
 import JobTitleForm from "./jobtitles/JobTitleForm";
 import { JobTitleTable } from "./jobtitles/data-table";
+import UserForm from "./users/UserForm";
+import { UserTable } from "./users/data-table";
+import { Employee } from "../columns";
 
 async function Settings() {
   const branches = await prisma.branch.findMany({
@@ -63,6 +67,18 @@ async function Settings() {
     createdBy: department.createdBy,
   }));
 
+  const users = await prisma.user.findMany({
+    orderBy: { name: "asc" },
+  });
+
+  // Map to Employee type
+  const employees: Employee[] = users.map((user) => ({
+    id: user.id,
+    name: user.name ?? "N/A",
+    email: user.email,
+    role: user.role as "ADMIN" | "USER",
+  }));
+
   return (
     <div>
       <Breadcrumb>
@@ -81,7 +97,7 @@ async function Settings() {
 
       <div className="w-full overflow-x-auto mt-4">
         <Tabs defaultValue="company" className="w-full">
-          <TabsList>
+          <TabsList className="h-[50px] w-full gap-2">
             <TabsTrigger value="company">
               <Building /> Company
             </TabsTrigger>
@@ -93,6 +109,9 @@ async function Settings() {
             </TabsTrigger>
             <TabsTrigger value="jobTitle">
               <UserStar /> Job Titles
+            </TabsTrigger>
+            <TabsTrigger value="user">
+              <User /> Users
             </TabsTrigger>
             <TabsTrigger value="workSchedule">
               <Clock /> Work Schedule
@@ -180,6 +199,25 @@ async function Settings() {
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
                 <JobTitleTable columns={columns} data={dept} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="user">
+            <Card>
+              <CardHeader>
+                <CardTitle>User</CardTitle>
+                <CardDescription>
+                  Create and manage your user&apos;s here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <UserForm />
+              </CardContent>
+            </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <UserTable columns={columns} data={employees} />
               </div>
             </div>
           </TabsContent>
