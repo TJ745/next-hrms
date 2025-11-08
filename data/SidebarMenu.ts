@@ -19,9 +19,9 @@ export const sidebarMenuItems = (role:Role):SidebarProps[] => [
     title: "Employees",
     icon: Users,
     children:[
-      { title: "Manage Employees", url: "/dashboard",  },
-  { title: "Directory",url: "/",},
-  {title: "Organization Chart", url: "/", },]
+      { title: "Manage Employees", url: "/dashboard/employees/list",  },
+  { title: "Directory",url: "/dashboard/employees/directory",},
+  {title: "Organization Chart", url: "/dashboard/employees/og", },]
   },
   {
     title: "Time Off",
@@ -170,7 +170,7 @@ export const sidebarMenuItems = (role:Role):SidebarProps[] => [
   },
 ...(role ==="ADMIN" ? [  {
     title: "Setting",
-    url: "dashboard/settings",
+    url: "/dashboard/settings",
     icon: Settings,
     // children:[
     // {

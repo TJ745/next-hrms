@@ -25,7 +25,7 @@ function RegisterForm() {
       setIsPending(false);
     } else {
       toast.success("Registered successfully. You can now log in.");
-      router.push("/auth/login");
+      router.push("/company");
     }
   }
 

@@ -1,5 +1,3 @@
-import { ChangePasswordForm } from "@/components/ChangePasswordForm";
-import SignOutButton from "@/components/SignOutButton";
 import { Button } from "@/components/ui/button";
 import { UpdateUserForm } from "@/components/UpdateUserForm";
 import { auth } from "@/lib/auth";
@@ -27,8 +25,8 @@ async function page() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center  p-4">
+      <div className="w-full max-w-md rounded-2xl bg-primary-foreground p-8 shadow-lg">
         <h1 className="mb-6 text-center text-2xl font-semibold text-gray-800">
           Profile
         </h1>
@@ -38,16 +36,8 @@ async function page() {
               <Link href="/dashboard">Dashboard</Link>
             </Button>
           )}
-          <SignOutButton />
         </div>
         <div className="text-2xl font-bold">Permissions</div>
-
-        <div className="space-x-4">
-          <Button size="sm">Manage Own Posts</Button>
-          <Button size="sm" disabled={!FULL_POST_ACCESS.success}>
-            Manage All Posts
-          </Button>
-        </div>
 
         <div className="my-8">
           {session.user.image ? (
@@ -76,12 +66,6 @@ async function page() {
             name={session.user.name}
             image={session.user.image ?? ""}
           />
-        </div>
-
-        <div className="space-y-4 p-4 rounded-b-md border-t-8 border-red-600">
-          <h2 className="text-2xl font-bold">Change Password</h2>
-
-          <ChangePasswordForm />
         </div>
       </div>
     </div>

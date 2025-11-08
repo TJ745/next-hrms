@@ -9,8 +9,14 @@ datasource db {
 }
 
 enum UserRole {
-  USER
+  OWNER
   ADMIN
+  HR_MANAGER
+  BRANCH_MANAGER
+  DEPARTMENT_HEAD
+  STAFF
+  WORKER
+  USER
 }
 
 model Post {
@@ -40,6 +46,12 @@ model User {
   sessions      Session[]
   accounts      Account[]
   posts         Post[]
+
+  createdCompanies   Company[]    @relation("CompanyCreator")
+  createdEmployees   Employee[]   @relation("CreatedEmployees")
+  employeeProfile    Employee?    @relation("EmployeeUser")
+  createdBranches    Branch[]     @relation("CreatedBranches")
+  createdDepartments Department[] @relation("CreatedBranches")
 
   banned     Boolean?  @default(false)
   banReason  String?
@@ -95,4 +107,88 @@ model Verification {
   expiresAt  DateTime
 
   @@map("verifications")
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  logo      String?
+  vatNumber String?
+  crNumber  String?
+  phone     String?
+  email     String?
+  website   String?
+  address   String?
+
+  createdBy String
+  admin     User   @relation("CompanyCreator", fields: [createdBy], references: [id])
+
+  branches Branch[]
+  Employee Employee[]
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name    String
+  address String?
+  phone   String?
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  creator   User   @relation("CreatedBranches", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  departments Department[]
+  Employee    Employee[]
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name     String
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  creator   User   @relation("CreatedBranches", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  employees Employee[]
+}
+
+model Employee {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name     String
+  image    String?
+  email    String
+  phone    String?
+  empId    String  @unique
+  position String?
+  status   String? // Active, Terminated, etc.
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  createdBy String
+  creator   User   @relation("CreatedEmployees", fields: [createdBy], references: [id])
+
+  userId String? @unique // Connects to Better Auth User
+  user   User?   @relation("EmployeeUser", fields: [userId], references: [id], onDelete: Cascade)
 }

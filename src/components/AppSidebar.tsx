@@ -2,6 +2,7 @@ import React from "react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -107,6 +108,11 @@ function AppSidebar({ role }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <div className="p-4 text-sm text-center">
+          &copy; {new Date().getFullYear()} HRM System
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -27,8 +27,42 @@ import {
   UserStar,
 } from "lucide-react";
 import React from "react";
+import BranchForm from "./branches/BranchForm";
+import { DataTable } from "./branches/data-table";
+import { Branch, columns } from "./branches/columns";
+import { prisma } from "@/lib/prisma";
+import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+import DepartmentForm from "./departments/DepartmentForm";
+import { Department } from "./departments/columns";
+import { DepartmentTable } from "./departments/data-table";
+import JobTitleForm from "./jobtitles/JobTitleForm";
+import { JobTitleTable } from "./jobtitles/data-table";
 
-function Settings() {
+async function Settings() {
+  const branches = await prisma.branch.findMany({
+    orderBy: { name: "asc" },
+  });
+
+  const table: Branch[] = branches.map((branch) => ({
+    id: branch.id,
+    name: branch.name,
+    phone: branch.phone,
+    address: branch.address,
+    companyId: branch.companyId,
+    createdBy: branch.createdBy,
+  }));
+
+  const departments = await prisma.department.findMany({
+    orderBy: { name: "asc" },
+  });
+
+  const dept: Department[] = departments.map((department) => ({
+    id: department.id,
+    name: department.name,
+    branchId: department.branchId,
+    createdBy: department.createdBy,
+  }));
+
   return (
     <div>
       <Breadcrumb>
@@ -44,6 +78,7 @@ function Settings() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+
       <div className="w-full overflow-x-auto mt-4">
         <Tabs defaultValue="company" className="w-full">
           <TabsList>
@@ -66,6 +101,7 @@ function Settings() {
               <Asterisk /> Password
             </TabsTrigger>
           </TabsList>
+
           <TabsContent value="company">
             <Card>
               <CardHeader>
@@ -90,7 +126,65 @@ function Settings() {
               </CardFooter>
             </Card>
           </TabsContent>
-          <TabsContent value="password">
+
+          <TabsContent value="branch">
+            <Card>
+              <CardHeader>
+                <CardTitle>Branches</CardTitle>
+                <CardDescription>
+                  Create and manage your company branches here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid ">
+                <BranchForm />
+              </CardContent>
+            </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <DataTable columns={columns} data={table} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="department">
+            <Card>
+              <CardHeader>
+                <CardTitle>Departments</CardTitle>
+                <CardDescription>
+                  Create and manage your branch departments here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid ">
+                <DepartmentForm />
+              </CardContent>
+            </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <DepartmentTable columns={columns} data={dept} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="jobTitle">
+            <Card>
+              <CardHeader>
+                <CardTitle>Job Title</CardTitle>
+                <CardDescription>
+                  Create and manage your job title&apos;s here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <JobTitleForm />
+              </CardContent>
+            </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <JobTitleTable columns={columns} data={dept} />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="workSchedule">
             <Card>
               <CardHeader>
                 <CardTitle>Password</CardTitle>
@@ -112,6 +206,18 @@ function Settings() {
               <CardFooter>
                 <Button>Save password</Button>
               </CardFooter>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="password">
+            <Card>
+              <CardHeader>
+                <CardTitle>Password</CardTitle>
+                <CardDescription>Change your password here.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <ChangePasswordForm />
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
