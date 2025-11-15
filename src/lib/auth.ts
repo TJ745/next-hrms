@@ -23,12 +23,12 @@ const options = {
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
-    autoSignIn: false,
+    autoSignIn: true,
     password: {
       hash: hashPassword,
       verify: verifyPassword,
     },
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
       await sendEmailAction({
         to: user.email,
@@ -45,7 +45,7 @@ const options = {
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       const link = new URL(url);
-      link.searchParams.set("callbakURL", "/auth/verify");
+      link.searchParams.set("callbackURL", "/auth/verify");
 
       await sendEmailAction({
         to: user.email,
@@ -92,7 +92,7 @@ const options = {
           },
         };
       }
-      if (ctx.path === "/upadte-user") {
+      if (ctx.path === "/update-user") {
         return {
           context: {
             ...ctx,
@@ -122,9 +122,13 @@ const options = {
   user: {
     additionalFields: {
       role: {
-        type: ["USER", "ADMIN"] as Array<UserRole>,
+        type: ["ADMIN" , "MANAGER" , "EMPLOYEE"] as Array<UserRole>,
         input: false,
       },
+      companyId: {
+    type: "string",
+    input: false,
+  },
     },
   },
   session: {
@@ -147,7 +151,7 @@ const options = {
   plugins: [
     nextCookies(),
     admin({
-      defaultRole: UserRole.USER,
+      defaultRole: UserRole.EMPLOYEE,
       adminRoles: [UserRole.ADMIN],
       ac,
       roles,
@@ -182,9 +186,10 @@ export const auth = betterAuth({
           id: user.id,
           name: user.name,
           email: user.email,
-          image: user.image,
+          // image: user.image,
           createdAt: user.createdAt,
           role: user.role,
+          companyId: user.companyId,
         },
       };
     }, options),

@@ -9,28 +9,9 @@ datasource db {
 }
 
 enum UserRole {
-  OWNER
   ADMIN
-  HR_MANAGER
-  BRANCH_MANAGER
-  DEPARTMENT_HEAD
-  STAFF
-  WORKER
-  USER
-}
-
-model Post {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  title   String
-  content String?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("posts")
+  MANAGER
+  EMPLOYEE
 }
 
 model User {
@@ -39,23 +20,26 @@ model User {
   updatedAt DateTime @default(now()) @updatedAt
 
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  image         String?
-  role          UserRole  @default(USER)
-  sessions      Session[]
-  accounts      Account[]
-  posts         Post[]
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  role          UserRole @default(EMPLOYEE)
 
-  createdCompanies   Company[]    @relation("CompanyCreator")
-  createdEmployees   Employee[]   @relation("CreatedEmployees")
-  employeeProfile    Employee?    @relation("EmployeeUser")
-  createdBranches    Branch[]     @relation("CreatedBranches")
-  createdDepartments Department[] @relation("CreatedBranches")
+  sessions Session[]
+  accounts Account[]
 
   banned     Boolean?  @default(false)
   banReason  String?
   banExpires DateTime?
+
+  companyId    String?
+  company      Company?    @relation(fields: [companyId], references: [id])
+  branchId     String?
+  branch       Branch?     @relation(fields: [branchId], references: [id])
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  employee     Employee?
+  inviteTokens InviteToken[]
 
   @@map("users")
 }
@@ -123,11 +107,10 @@ model Company {
   website   String?
   address   String?
 
-  createdBy String
-  admin     User   @relation("CompanyCreator", fields: [createdBy], references: [id])
-
+  users    User[]
   branches Branch[]
-  Employee Employee[]
+
+  @@map("companies")
 }
 
 model Branch {
@@ -142,11 +125,10 @@ model Branch {
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  createdBy String
-  creator   User   @relation("CreatedBranches", fields: [createdBy], references: [id], onDelete: Cascade)
-
   departments Department[]
-  Employee    Employee[]
+  users       User[]
+
+  @@map("branches")
 }
 
 model Department {
@@ -154,14 +136,14 @@ model Department {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name     String
+  name String
+
   branchId String
   branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
-  createdBy String
-  creator   User   @relation("CreatedBranches", fields: [createdBy], references: [id], onDelete: Cascade)
+  users User[]
 
-  employees Employee[]
+  @@map("departments")
 }
 
 model Employee {
@@ -169,26 +151,46 @@ model Employee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name     String
-  image    String?
-  email    String
-  phone    String?
-  empId    String  @unique
-  position String?
-  status   String? // Active, Terminated, etc.
+  empId         String?
+  image         String?
+  phone         String?
+  gender        String?
+  nationality   String?
+  dateOfBirth   DateTime?
+  maritalStatus String?
+  address       String?
 
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  emergencyName     String?
+  emergencyPhone    String?
+  emergencyRelation String?
 
-  branchId String?
-  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  iqamaNo        String?
+  iqamaExpiry    DateTime?
+  passportNo     String?
+  passportExpiry DateTime?
 
-  companyId String?
-  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobTitle     String?
+  joinDate     DateTime?
+  contractType String? // Full-time, Part-time, Contract
+  position     String?
+  basicSalary  Float?
+  allowances   Float?
+  totalSalary  Float?
 
-  createdBy String
-  creator   User   @relation("CreatedEmployees", fields: [createdBy], references: [id])
+  status String? // Active, Terminated, etc.
 
-  userId String? @unique // Connects to Better Auth User
-  user   User?   @relation("EmployeeUser", fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("employees")
+}
+
+model InviteToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }

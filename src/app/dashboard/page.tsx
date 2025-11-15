@@ -54,7 +54,7 @@ async function Dashboard() {
   }));
 
   const company = await prisma.company.findFirst({
-    where: { createdBy: session.user.id },
+    // where: { createdBy: session.user.id },
   });
 
   return (
@@ -90,7 +90,7 @@ async function Dashboard() {
             <div>
               <h1 className="text-xl">{company?.name}</h1>
               <span className="text-sm">{company?.address}</span>
-              <span className="text-sm">{company?.createdBy}</span>
+              {/* <span className="text-sm">{company?.createdBy}</span> */}
             </div>
             <div>
               {/* <Image

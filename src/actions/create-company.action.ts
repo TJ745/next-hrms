@@ -13,7 +13,6 @@ export async function createCompanyAction(formData: FormData) {
     throw new Error("Unauthorized — only admin can create company");
   }
 
-
   const name = String(formData.get("name"));
   const logo = formData.get("logo") ? String(formData.get("logo")) : null;
   const vatNumber = formData.get("vatNumber")
@@ -47,11 +46,15 @@ export async function createCompanyAction(formData: FormData) {
         email,
         website,
         address,
-        createdBy: session.user.id,
       },
     });
 
-    return { success: true, company };
+      await prisma.user.update({
+    where: { id: session.user.id },
+    data: { companyId: company.id },
+  });
+
+    return { success: true };
   } catch (err) {
     console.error(err);
     return { error: "Failed to create company" };

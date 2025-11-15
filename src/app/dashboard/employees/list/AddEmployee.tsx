@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -10,47 +10,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createEmployeeAction } from "@/actions/employee.actions";
 import { toast } from "sonner";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getDepartmentsAction } from "@/actions/department.actions";
 
-// function formatDate(date: Date | undefined) {
-//   if (!date) {
-//     return "";
-//   }
-
-//   return date.toLocaleDateString("en-US", {
-//     day: "2-digit",
-//     month: "long",
-//     year: "numeric",
-//   });
-// }
-
-// function isValidDate(date: Date | undefined) {
-//   if (!date) {
-//     return false;
-//   }
-//   return !isNaN(date.getTime());
-// }
-
-export function AddEmployee() {
+export function AddEmployee({ departments }: any) {
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [departmentId, setDepartmentId] = useState("");
+  const [role, setRole] = useState("");
+
   const router = useRouter();
 
-  const [openCal, setOpenCal] = React.useState(false);
-  const [date, setDate] = React.useState<Date | undefined>(
-    new Date("2025-06-01")
-  );
-  // const [month, setMonth] = React.useState<Date | undefined>(date);
-  // const [value, setValue] = React.useState(formatDate(date));
+  useEffect(() => {
+    async function loadDepartment() {
+      const data = await getDepartmentsAction();
+    }
+    loadDepartment();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,6 +45,8 @@ export function AddEmployee() {
     setIsPending(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
+    formData.append("departmentId", departmentId);
+    formData.append("role", role);
     const result = await createEmployeeAction(formData);
 
     if (result?.error) {
@@ -93,24 +82,8 @@ export function AddEmployee() {
 
           {/* Drawer Body */}
           <div className="p-6 space-y-4">
-            <form
-              onSubmit={handleSubmit}
-              //   action={async (formData) => {
-              //     // "use server";
-              //     // TODO: handle saving via server action
-              //   }}
-            >
+            <form onSubmit={handleSubmit}>
               <div className="space-y-4">
-                <div className="space-y-3">
-                  <Label htmlFor="empId">Employee ID</Label>
-                  <Input
-                    id="empId"
-                    name="empId"
-                    placeholder="Employee ID"
-                    required
-                  />
-                </div>
-
                 <div className="space-y-3">
                   <Label htmlFor="name">Name</Label>
                   <Input
@@ -133,68 +106,37 @@ export function AddEmployee() {
                 </div>
 
                 <div className="space-y-3">
-                  <Label htmlFor="joiningDate">Joining Date</Label>
-                  <div className="relative flex gap-2">
-                    <Input
-                      id="date"
-                      // value={value}
-                      placeholder="June 01, 2025"
-                      className="bg-background pr-10"
-                      // onChange={(e) => {
-                      //   const date = new Date(e.target.value);
-                      //   setValue(e.target.value);
-                      //   if (isValidDate(date)) {
-                      //     setDate(date);
-                      //     setMonth(date);
-                      //   }
-                      // }}
-                      onKeyDown={(e) => {
-                        if (e.key === "ArrowDown") {
-                          e.preventDefault();
-                          setOpen(true);
-                        }
-                      }}
-                    />
-                    <Popover open={openCal} onOpenChange={setOpenCal}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          id="date-picker"
-                          variant="ghost"
-                          className="absolute top-1/2 right-2 size-6 -translate-y-1/2"
-                        >
-                          <CalendarIcon className="size-3.5" />
-                          <span className="sr-only">Select date</span>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent
-                        className="w-auto overflow-hidden p-0"
-                        align="end"
-                        alignOffset={-8}
-                        sideOffset={10}
-                      >
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          captionLayout="dropdown"
-                          onSelect={(date) => {
-                            setDate(date);
-                            setOpenCal(false);
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  <Label>Role</Label>
+                  <Select onValueChange={setRole}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="MANAGER">Manager</SelectItem>
+                        <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Input
-                id="role"
-                name="role"
-                placeholder="e.g. USER or ADMIN"
-                required
-                />
-                </div> */}
+                <div className="space-y-3">
+                  <Label>Department</Label>
+                  <Select onValueChange={setDepartmentId}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {departments.map((d: any) => (
+                          <SelectItem key={d.id} value={d.id}>
+                            {d.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="flex w-full gap-2">
                 <Button type="reset" className="mt-4 w-[50%]" variant="outline">

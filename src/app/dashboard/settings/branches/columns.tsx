@@ -11,7 +11,6 @@ export type Branch = {
   address: string | null;
   phone: string | null;
   companyId: string;
-  createdBy: string;
   action?: string;
 };
 

@@ -41,11 +41,10 @@ import { JobTitleTable } from "./jobtitles/data-table";
 import UserForm from "./users/UserForm";
 import { UserTable } from "./users/data-table";
 import { Employee } from "../columns";
+import { getBranchesAction } from "@/actions/branch.actions";
 
 async function Settings() {
-  const branches = await prisma.branch.findMany({
-    orderBy: { name: "asc" },
-  });
+  const branches = await getBranchesAction();
 
   const table: Branch[] = branches.map((branch) => ({
     id: branch.id,
@@ -53,7 +52,6 @@ async function Settings() {
     phone: branch.phone,
     address: branch.address,
     companyId: branch.companyId,
-    createdBy: branch.createdBy,
   }));
 
   const departments = await prisma.department.findMany({
@@ -64,7 +62,6 @@ async function Settings() {
     id: department.id,
     name: department.name,
     branchId: department.branchId,
-    createdBy: department.createdBy,
   }));
 
   const users = await prisma.user.findMany({
@@ -174,7 +171,7 @@ async function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid ">
-                <DepartmentForm />
+                <DepartmentForm branches={branches} />
               </CardContent>
             </Card>
             <div className="mt-2">
@@ -198,7 +195,7 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                <JobTitleTable columns={columns} data={dept} />
+                {/* <JobTitleTable columns={columns} data={dept} /> */}
               </div>
             </div>
           </TabsContent>

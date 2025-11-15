@@ -7,17 +7,17 @@ import { ArrowUpDown } from "lucide-react";
 
 export type Employee = {
   id: string;
-  name: string;
+  name?: string;
   image?: string | null;
-  email: string;
+  email?: string;
   phone?: string;
   empId?: string;
   position?: string;
   status?: "ACTIVE" | "INACTIVE";
   departmentId?: string;
   branchId?: string;
-  companyId: string;
-  createdBy: string;
+  companyId?: string;
+  createdBy?: string;
   userId?: string;
   action?: string;
 };

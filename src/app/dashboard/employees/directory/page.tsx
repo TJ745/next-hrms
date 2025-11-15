@@ -12,7 +12,7 @@ import { EmployeeCard } from "./EmployeeCard";
 
 async function Directory() {
   const employees = await prisma.employee.findMany({
-    orderBy: { name: "asc" },
+    // orderBy: { name: "asc" },
   });
 
   return (

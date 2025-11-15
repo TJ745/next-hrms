@@ -12,25 +12,28 @@ import { columns, Employee } from "../columns";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { AddEmployee } from "./AddEmployee";
+import { getDepartmentsAction } from "@/actions/department.actions";
 
 async function AllEmployees() {
+  const departments = await getDepartmentsAction();
+
   const employees = await prisma.employee.findMany({
-    orderBy: { name: "asc" },
+    // orderBy: { name: "asc" },
   });
 
   const emptable: Employee[] = employees.map((employee) => ({
     id: employee.id,
-    name: employee.name,
+    // name: employee.name,
     image: employee.image,
-    email: employee.email,
+    // email: employee.email,
     phone: employee.phone,
     empId: employee.empId,
     position: employee.position,
     status: employee.status as "ACTIVE" | "INACTIVE",
-    departmentId: employee.departmentId,
-    branchId: employee.branchId,
-    companyId: employee.companyId,
-    createdBy: employee.createdBy,
+    // departmentId: employee.departmentId,
+    // branchId: employee.branchId,
+    // companyId: employee.companyId,
+    // createdBy: employee.createdBy,
     userId: employee.userId,
   }));
 
@@ -61,7 +64,7 @@ async function AllEmployees() {
                 <FileDown size={20} /> Download
               </Button>
 
-              <AddEmployee />
+              <AddEmployee departments={departments} />
             </div>
           </div>
           <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4 mt-4">

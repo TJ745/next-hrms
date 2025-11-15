@@ -10,7 +10,7 @@ const statements = {
 export const ac = createAccessControl(statements);
 
 export const roles = {
-  [UserRole.USER]: ac.newRole({
+  [UserRole.EMPLOYEE]: ac.newRole({
     posts: ["create", "read", "update:own", "delete:own"],
   }),
   [UserRole.ADMIN]: ac.newRole({

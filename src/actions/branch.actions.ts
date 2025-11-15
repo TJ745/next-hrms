@@ -8,26 +8,21 @@ export async function createBranchAction(formData: FormData) {
   const headerList = await headers();
   const session = await auth.api.getSession({ headers: headerList });
 
-  if (!session?.user) throw new Error("Unauthorized");
-  if (!["ADMIN", "HR_MANAGER"].includes(session.user.role))
-    throw new Error("Forbidden");
+   if (!session || !["ADMIN"].includes(session.user.role)) {
+    return { error: "Unauthorized — only admin can create branches." };
+  }
 
   const name = String(formData.get("name"));
-    if (!name) return { error: "Name is required" };
+    if (!name) return { error: "Branch name is required" };
   const address = String(formData.get("address"));
   // const companyId = String(formData.get("companyId"));
   const phone = String(formData.get("phone"));
 
 
   try {
-     // 🔹 Check that the company exists
-    const company = await prisma.company.findFirst({
-      where: { createdBy: session.user.id },
-    });
-    if (!company) {
-      return { error: "Company not found. Please create a company first." };
-    }
-
+    if (!session.user.companyId) {
+  return { error: "User does not belong to a company" };
+}
 
     // 🏢 Create company linked to admin
     const branch = await prisma.branch.create({
@@ -35,25 +30,22 @@ export async function createBranchAction(formData: FormData) {
       name,
       address,
       phone,
-      company: { connect: { id: company.id } },
-        creator: { connect: { id: session.user.id } },
-    },include: {
-        company: true,
-        creator: true,
-      },
+      companyId: session.user.companyId!,
+    }
     });
 
-    return { success: true, branch };
+    return { success: true};
   } catch (err) {
     console.error(err);
     return { error: "Failed to create branch" };
   }
 }
 
-export async function getBranchesAction(companyId: string) {
-  return await prisma.branch.findMany({
-    where: { companyId },
-    include: { company: true },
+export async function getBranchesAction() {
+  const headerList = await headers();
+  const session = await auth.api.getSession({ headers: headerList });
+  return prisma.branch.findMany({
+    where: { companyId: session?.user.companyId  },
   });
 }
 

@@ -10,47 +10,49 @@ export async function createDepartmentAction(formData: FormData) {
 
   if (!session?.user) throw new Error("Unauthorized");
 
-  const name = String(formData.get("name"));
-  // const branchId = String(formData.get("branchId"));
+  const userCompanyId = session.user.companyId;
 
+  if (!userCompanyId) {
+    throw new Error("User does not belong to any company");
+  }
+
+  const name = String(formData.get("name"));
+  const branchId = String(formData.get("branchId"));
+  if (!name || !branchId) {
+    throw new Error("Name and Branch are required");
+  }
 
 
   try {
-       // 🔹 Check that the company exists
-      const branch = await prisma.branch.findFirst({
-        where: { createdBy: session.user.id },
-      });
-      if (!branch) {
-        return { error: "Branch not found. Please create a branch first." };
-      }
-  
+       // 🔹 Check that the branch exists
+        const branch = await prisma.branch.findFirst({
+    where: { id: branchId, companyId: userCompanyId },
+  });
+       if (!branch) {
+    throw new Error("Invalid branch — does not belong to your company");
+  }
   
       // 🏢 Create company linked to admin
       const department = await prisma.department.create({
         data: {
       name,
-      // branchId,
-         branch: { connect: { id: branch.id } },
-        creator: { connect: { id: session.user.id } },
-      // createdBy: session.user.id,
-    },include: {
-          branch: true,
-          creator: true,
+      branchId,
+         
         },
         
       });
+      
   
-      return { success: true, department };
+      return { success: true };
     } catch (err) {
       console.error(err);
       return { error: "Failed to create department" };
     }
 }
 
-export async function getDepartmentsAction(branchId: string) {
+export async function getDepartmentsAction() {
   return await prisma.department.findMany({
-    where: { branchId },
-    include: { branch: true },
+    
   });
 }
 
