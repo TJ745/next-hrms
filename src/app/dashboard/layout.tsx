@@ -16,7 +16,7 @@ export default async function DashboardLayout({
   });
 
   if (!session) redirect("/auth/login");
-  if (session.user.role !== "ADMIN") {
+  if (session.user.role !== "ADMIN" && session.user.role !== "MANAGER") {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center text-center bg-gray-100 p-4">
         <p className="text-red-500">

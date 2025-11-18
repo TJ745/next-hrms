@@ -52,14 +52,16 @@ export function AddEmployee({ departments }: any) {
     if (result?.error) {
       toast.error(result.error);
       setIsPending(false);
-    } else if (result?.redirect) {
-      toast.success("Employee created successfully!");
-      setTimeout(() => {
-        // close drawer and redirect to employee profile
-        setOpen(false);
-        router.push(result.redirect);
-      }, 800);
-    } else {
+    } 
+    // else if (result?.redirect) {
+    //   toast.success("Employee created successfully!");
+    //   setTimeout(() => {
+    //     // close drawer and redirect to employee profile
+    //     setOpen(false);
+    //     router.push(result.redirect);
+    //   }, 800);
+    // } 
+    else {
       toast.success("Employee created successfully!");
       router.refresh();
       setIsPending(false);

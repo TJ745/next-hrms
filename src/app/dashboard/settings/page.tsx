@@ -42,8 +42,14 @@ import UserForm from "./users/UserForm";
 import { UserTable } from "./users/data-table";
 import { Employee } from "../columns";
 import { getBranchesAction } from "@/actions/branch.actions";
+import CompanyForm from "./companies/CompanyForm";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 async function Settings() {
+  const headersList = await headers();
+  const session = await auth.api.getSession({headers: headersList});
+
   const branches = await getBranchesAction();
 
   const table: Branch[] = branches.map((branch) => ({
@@ -75,6 +81,10 @@ async function Settings() {
     email: user.email,
     role: user.role as "ADMIN" | "USER",
   }));
+
+  const company = await prisma.company.findUnique({
+    where: { id: session?.user.companyId },
+  });
 
   return (
     <div>
@@ -123,23 +133,14 @@ async function Settings() {
               <CardHeader>
                 <CardTitle>Company Info</CardTitle>
                 <CardDescription>
-                  Make changes to your account here. Click save when you&apos;re
+                  Make changes to your company info here. Click update when you&apos;re
                   done.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-name">Name</Label>
-                  <Input id="tabs-demo-name" defaultValue="Pedro " />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-username">Username</Label>
-                  <Input id="tabs-demo-username" defaultValue="@pd" />
-                </div>
+                <CompanyForm company={company} />
               </CardContent>
-              <CardFooter>
-                <Button>Save changes</Button>
-              </CardFooter>
+              
             </Card>
           </TabsContent>
 

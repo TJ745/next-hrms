@@ -6,9 +6,7 @@ import { Label, Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  
 } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -19,46 +17,32 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
+interface GenderChartProps {
+  data: {
+    male: number;
+    female: number;
+    other: number;
+  };
+}
+
 export const description = "A donut chart with text";
 
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 287, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 190, fill: "var(--color-other)" },
-];
+export function ChartPieDonutText({ data }: GenderChartProps) {
+  
+  const chartData = [
+    { gender: "Male", count: data.male, fill: "var(--chart-1)" },
+    { gender: "Female", count: data.female, fill: "var(--chart-2)" },
+    { gender: "Other", count: data.other, fill: "var(--chart-3)" },
+  ];
 
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "var(--chart-1)",
-  },
-  safari: {
-    label: "Safari",
-    color: "var(--chart-2)",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "var(--chart-3)",
-  },
-  edge: {
-    label: "Edge",
-    color: "var(--chart-4)",
-  },
-  other: {
-    label: "Other",
-    color: "var(--chart-5)",
-  },
-} satisfies ChartConfig;
+  const totalEmployees = data.male + data.female + data.other;
 
-export function ChartPieDonutText() {
-  const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
+  const chartConfig: ChartConfig = {
+    Male: { label: "Male", color: "var(--chart-1)" },
+    Female: { label: "Female", color: "var(--chart-2)" },
+    Other: { label: "Other", color: "var(--chart-3)" },
+  };
+
 
   return (
     <Card className="flex flex-col">
@@ -74,8 +58,8 @@ export function ChartPieDonutText() {
             />
             <Pie
               data={chartData}
-              dataKey="visitors"
-              nameKey="browser"
+              dataKey="count"
+              nameKey="gender"
               innerRadius={60}
               strokeWidth={5}
             >
@@ -94,7 +78,7 @@ export function ChartPieDonutText() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {totalVisitors.toLocaleString()}
+                          {totalEmployees}
                         </tspan>
                         <tspan
                           x={viewBox.cx}
@@ -110,7 +94,7 @@ export function ChartPieDonutText() {
               />
             </Pie>
             <ChartLegend
-              content={<ChartLegendContent nameKey="browser" />}
+              content={<ChartLegendContent nameKey="gender" />}
               className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
             />
           </PieChart>

@@ -28,7 +28,8 @@ import { DataTable } from "./data-table";
 import { ChartPieDonutText } from "@/components/TotalEmployeePieCHart";
 import { ChartLineMultiple } from "@/components/TotalEmployeeLineChart";
 import Image from "next/image";
-import { getDashboardStatsAction } from "@/actions/dashboard.action";
+import { getDashboardStatsAction, getEmployeesByGender } from "@/actions/dashboard.action";
+import DashboardClock from "./DashboardClock";
 
 async function Dashboard() {
   const session = await auth.api.getSession({
@@ -37,7 +38,7 @@ async function Dashboard() {
 
   if (!session) redirect("/auth/login");
 
-  const { totalEmployees, totalBranches, totalDepartments } =
+  const { totalEmployees, totalBranches, totalDepartments, newEmployees } =
     await getDashboardStatsAction();
 
   // Fetch employees from Prisma
@@ -56,6 +57,9 @@ async function Dashboard() {
   const company = await prisma.company.findFirst({
     // where: { createdBy: session.user.id },
   });
+
+  const genderData = await getEmployeesByGender();
+
 
   return (
     <main className="w-full">
@@ -76,31 +80,43 @@ async function Dashboard() {
         {/* Welcome & Company Info */}
 
         <div className="grid grid-cols-3 gap-2 p-2 mt-2">
-          <div className="col-span-1 space-y-1 bg-primary-foreground rounded-lg p-4">
-            <h1 className="text-xl">
+          <div className="col-span-2 space-y-1 bg-primary-foreground rounded-lg p-4">
+            
+            <div className="flex items-center justify-between">
+              <div>
+
+              <h1 className="text-xl">
               Welcome Back,{" "}
               <span className="font-bold">{session.user.name}! 👋</span>
             </h1>
             <p className="text-sm">
-              Here's what's happening with your company today.
+              Here&apos;s what&apos;s happening with your company today.
             </p>
-            <span></span>
-          </div>
-          <div className="col-span-2 bg-primary-foreground rounded-lg p-4 flex items-center justify-between">
+              </div>
+
             <div>
+                 <DashboardClock/>        
+            </div>
+              </div>
+          </div>
+          <div className="col-span-1 bg-primary-foreground rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div>
+
+              <Image
+                src={company?.logo ?? "/default-logo.png"}
+                alt="company logo"
+                width={80}
+                height={80}
+                />   
+                </div>
+                <div>
+
               <h1 className="text-xl">{company?.name}</h1>
               <span className="text-sm">{company?.address}</span>
-              {/* <span className="text-sm">{company?.createdBy}</span> */}
+                </div>
             </div>
-            <div>
-              {/* <Image
-                src={`${company?.logo}`}
-                alt="company logo"
-                width={50}
-                height={50}
-              /> */}{" "}
-              logo
-            </div>
+            
           </div>
         </div>
 
@@ -136,7 +152,7 @@ async function Dashboard() {
               <h1 className="text-lg font-bold">New Employees</h1>
             </div>
             <div className="flex flex-col items-center justify-center">
-              <h2 className="text-2xl">10</h2>
+              <h2 className="text-2xl">{newEmployees}</h2>
               <span className="text-sm bg-accent px-2 py-1 rounded-md">
                 Down
               </span>
@@ -212,11 +228,11 @@ async function Dashboard() {
         <div className="grid grid-cols-4 gap-4 mt-4">
           <div className="col-span-1 bg-secondary p-2 rounded-xl">
             <h1 className="text-xl font-bold">Total Employees</h1>
-            <ChartPieDonutText />
+            <ChartPieDonutText data={genderData} />
           </div>
           <div className="col-span-1 bg-secondary p-2 rounded-xl">
             <h1 className="text-xl font-bold">Total Departments</h1>
-            <ChartPieDonutText />
+            <ChartPieDonutText data={genderData} />
           </div>
           <div className="col-span-2 bg-secondary p-2 rounded-xl">
             <h1 className="text-xl font-bold">Team Performance</h1>

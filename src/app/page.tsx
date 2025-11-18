@@ -7,7 +7,7 @@ export default function Home() {
   const { data: session, isPending } = useSession();
 
   if (isPending) {
-    return <Button>Login</Button>;
+    return <div>Loading...</div>;
   }
 
   const href = session ? "/profile" : "/auth/login";

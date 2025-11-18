@@ -74,7 +74,7 @@ export default async function page({ params }: EmployeePageProps) {
               <Card className="flex flex-col items-center p-4 text-center shadow-sm transition hover:shadow-md">
                 <Image
                   src={employee.image || avatar}
-                  alt={employee.name}
+                  alt={employee.id}
                   width={70}
                   height={70}
                   className="rounded-full object-cover"

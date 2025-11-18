@@ -79,7 +79,7 @@ export async function createEmployeeAction(formData: FormData) {
   });
 
   // 4️⃣ Send onboarding email
-  const link = `${process.env.NEXT_PUBLIC_APP_URL}/auth/create-password?token=${token}`;
+  const link = `${process.env.NEXT_PUBLIC_API_URL}/auth/create-password?token=${token}`;
 
   await sendEmailAction({
     to: email,
@@ -91,8 +91,10 @@ export async function createEmployeeAction(formData: FormData) {
     },
   });
   
-      return { success: true, redirect: `/dashboard/employees/${user.id}` };
+      // return { success: true, redirect: `/dashboard/employees/${employee.id}` };
       
+      return { success: true };
+
     } catch (err) {
       console.error(err);
       return { error: "Failed to create employee" };

@@ -22,13 +22,32 @@ export async function setPasswordAction(formData: FormData) {
 
   const hashed = await hashPassword(password);
 
-  // Update user password
-  await prisma.user.update({
-    where: { id: invite.user.id },
-    data: {
-    //   password: hashed,
+  // 1. Check if credentials account exists
+  const existingAccount = await prisma.account.findFirst({
+    where: {
+      userId: invite.userId,
+      providerId: "credential",
     },
   });
+
+  // 2. If found → update password
+  if (existingAccount) {
+    await prisma.account.update({
+      where: { id: existingAccount.id },
+      data: { password: hashed },
+    });
+  } 
+  // 3. If not → create credentials account
+  else {
+    await prisma.account.create({
+      data: {
+        userId: invite.userId,
+        providerId: "credential",
+        accountId: invite.userId, // can be anything unique-ish
+        password: hashed,
+      },
+    });
+  }
 
   // Delete onboarding token
   await prisma.inviteToken.delete({
