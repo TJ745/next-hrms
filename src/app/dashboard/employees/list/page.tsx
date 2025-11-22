@@ -5,7 +5,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { FileDown, Plus, SlashIcon } from "lucide-react";
+import { FileDown, SlashIcon } from "lucide-react";
 import React from "react";
 import { DataTable } from "../data-table";
 import { columns, Employee } from "../columns";

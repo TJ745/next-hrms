@@ -20,11 +20,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className="flex flex-1 flex-col items-center justify-center text-center px-6">
         <h1 className="text-5xl font-extrabold mb-6">
-          Welcome to <span className="text-blue-600">Better Auth</span>
+          Welcome to <span className="text-blue-600">HRMS</span>
         </h1>
         <p className="text-lg text-gray-600 max-w-xl mb-8">
-          A modern full-stack application with Next.js 15, Tailwind CSS 4,
-          PostgreSQL, and better authentication.
+          Designed for HR teams who value speed, accuracy, and simplicity. From hiring to offboarding — we handle it all so you can focus on growth.
         </p>
         <div className="flex gap-4">
           <Button

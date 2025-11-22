@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendEmailAction } from "./send-email.action";
 import { randomBytes } from "crypto";
+import { Prisma } from "@/generated/prisma";
 
 export async function createEmployeeAction(formData: FormData) {
   const headerList = await headers();
@@ -101,14 +102,35 @@ export async function createEmployeeAction(formData: FormData) {
     }
 }
 
-export async function getEmployeesAction() {
-  return await prisma.employee.findMany({
-    
+export async function getEmployeeAction(id: string) {
+  return await prisma.employee.findUnique({
+    where: { id },
+    include: {
+      user: true,
+    },
   });
 }
 
-export async function updateEmployeeAction(id: string, data: any) {
-  return await prisma.employee.update({ where: { id }, data });
+export async function getEmployeesAction() {
+  return await prisma.employee.findMany({
+  include: {
+    user: true,
+  },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
+export async function updateEmployeeAction(id: string, data: Prisma.EmployeeUpdateInput) {
+  return await prisma.employee.update({ 
+    where: { id }, 
+    data, 
+    include: { 
+      user: true, 
+    }, 
+  });
 }
 
 export async function deleteEmployeeAction(id: string) {

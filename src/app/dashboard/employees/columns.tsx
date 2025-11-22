@@ -1,26 +1,30 @@
 "use client";
 
+import { deleteUserAction } from "@/actions/delete-user.action";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import Link from "next/link";
 
 export type Employee = {
   id: string;
-  name?: string;
+  name?: string | null;
   image?: string | null;
-  email?: string;
-  phone?: string;
-  empId?: string;
-  position?: string;
+  email?: string | null;
+  phone?: string | null;
+  empId?: string | null;
+  position?: string | null;
   status?: "ACTIVE" | "INACTIVE";
-  departmentId?: string;
-  branchId?: string;
-  companyId?: string;
-  createdBy?: string;
-  userId?: string;
-  action?: string;
+  departmentId?: string | null;
+  branchId?: string | null;
+  companyId?: string | null;
+  createdBy?: string | null;
+  userId?: string | null;
+  action?: string | null;
 };
+
 
 export const columns: ColumnDef<Employee>[] = [
   {
@@ -83,17 +87,38 @@ export const columns: ColumnDef<Employee>[] = [
           <Button
             variant="outline"
             size="sm"
-            onClick={() => console.log("View", employee.id)}
+            asChild
           >
+            <Link href={`/dashboard/employees/${employee.id}`}>
             View
+            </Link>
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => console.log("Delete", employee.id)}
-          >
+          <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" size="sm">
             Delete
           </Button>
+        </AlertDialogTrigger>
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Employee?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The employee will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction className="bg-destructive hover:bg-destructive text-white"
+              onClick={() => deleteUserAction({ userId: employee.userId! })}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
         </div>
       );
     },

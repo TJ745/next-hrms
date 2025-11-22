@@ -21,7 +21,7 @@ export async function deleteUserAction({ userId }: { userId: string }) {
 
   try {
     await prisma.user.delete({
-      where: { id: userId, role: "USER" },
+      where: { id: userId },
     });
 
     if (session.user.id === userId) {
@@ -30,7 +30,7 @@ export async function deleteUserAction({ userId }: { userId: string }) {
       });
       redirect("/auth/login");
     }
-    revalidatePath("/admin/dashboard");
+    revalidatePath("/dashboard");
     return { error: null };
   } catch (err) {
     if (isRedirectError(err)) {

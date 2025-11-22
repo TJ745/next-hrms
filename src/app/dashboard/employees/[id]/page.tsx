@@ -11,7 +11,6 @@ import { Mail, Phone, SlashIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import avatar from "../../../../../public/image/default.jpg";
-import { prisma } from "@/lib/prisma";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import GeneralFrom from "./GeneralFrom";
@@ -19,15 +18,13 @@ import JobForm from "./JobForm";
 import PayrollForm from "./PayrollForm";
 import DocumentsForm from "./DocumentsForm";
 import SettingForm from "./SettingForm";
+import { getEmployeeAction } from "@/actions/employee.actions";
 
-interface EmployeePageProps {
-  params: { id: string };
-}
 
-export default async function page({ params }: EmployeePageProps) {
-  const employee = await prisma.employee.findUnique({
-    where: { id: params.id },
-  });
+
+export default async function page({ params }: { params: { id: string } }) {
+  const {id} = await params;
+  const employee = await getEmployeeAction(id);
 
   // ✅ Handle missing employee gracefully
   if (!employee) {
@@ -70,8 +67,8 @@ export default async function page({ params }: EmployeePageProps) {
             <h1 className="text-xl font-bold">Employee Details</h1>
           </div>
           <div className="grid grid-cols-4 gap-4 mt-4">
-            <div className="col-span-1 bg-primary-foreground p-4 rounded-xl">
-              <Card className="flex flex-col items-center p-4 text-center shadow-sm transition hover:shadow-md">
+            <div className="col-span-1 bg-primary-foreground rounded-xl">
+              <Card className="flex flex-col items-center p-4 text-center shadow-sm transition hover:shadow-md h-full">
                 <Image
                   src={employee.image || avatar}
                   alt={employee.id}
@@ -80,7 +77,7 @@ export default async function page({ params }: EmployeePageProps) {
                   className="rounded-full object-cover"
                 />
                 <CardContent className="space-y-4">
-                  <h3 className="text-base font-semibold">{employee.name}</h3>
+                  <h3 className="text-base font-semibold">{employee.user.name}</h3>
                   <p className="text-sm text-gray-500">
                     {employee.position || "—"}
                   </p>
@@ -97,7 +94,7 @@ export default async function page({ params }: EmployeePageProps) {
                   )}
                   <hr />
                   <p className="text-xs text-gray-400 flex items-center justify-center gap-2 mt-2">
-                    <Mail size={14} /> {employee.email}
+                    <Mail size={14} /> {employee.user.email}
                   </p>
                   <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
                     <Phone size={14} /> {employee.phone}

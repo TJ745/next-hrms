@@ -3,17 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Employee, User } from "@/generated/prisma";
 import { Pencil, Save, X } from "lucide-react";
 import React, { useState, useTransition } from "react";
 
-interface GeneralFormProps {
-  employee: {
-    id: string;
-    name: string;
-    email?: string | null;
-    dateOfBirth?: string | null;
-  };
-}
+type GeneralFormProps = {
+  employee: Employee & { user: User };
+};
 
 function GeneralFrom({ employee }: GeneralFormProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -70,7 +66,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
             ) : (
               <span className="text-sm text-right text-foreground font-medium truncate max-w-[220px]">
                 {/* {formData[field.key as keyof typeof formData] || "—"} */}
-                {employee.name}
+                {employee.user.name}
               </span>
             )}
           </div>
@@ -79,7 +75,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Date of Birth
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -87,13 +83,13 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Nationality
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
             <Label className="w-[140px] text-muted-foreground">Email</Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -101,13 +97,13 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Health Insurance
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
             <Label className="w-[140px] text-muted-foreground">Gender</Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -115,7 +111,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Marital Status
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -123,7 +119,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Personal Tax ID
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -131,7 +127,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Social Insurance
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -139,7 +135,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Phone Number
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
         </CardContent>
@@ -195,14 +191,14 @@ function GeneralFrom({ employee }: GeneralFormProps) {
             ) : (
               <span className="text-sm text-right text-foreground font-medium truncate max-w-[220px]">
                 {/* {formData[field.key as keyof typeof formData] || "—"} */}
-                {employee.name}
+                {employee.user.name}
               </span>
             )}
           </div>
           <div className="flex items-center ">
             <Label className="w-[140px] text-muted-foreground">Country</Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -210,13 +206,13 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               State/Province
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
             <Label className="w-[140px] text-muted-foreground">City</Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
@@ -224,7 +220,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Postal Code
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
         </CardContent>
@@ -279,7 +275,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
             ) : (
               <span className="text-sm text-right text-foreground font-medium truncate max-w-[220px]">
                 {/* {formData[field.key as keyof typeof formData] || "—"} */}
-                {employee.name}
+                {employee.user.name}
               </span>
             )}
           </div>
@@ -288,7 +284,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               Phone Number
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.name}
+              {employee.user.name}
             </span>
           </div>
         </CardContent>
