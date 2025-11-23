@@ -4,29 +4,13 @@ import { deleteUserAction } from "@/actions/delete-user.action";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { EmployeeWithUser } from "@/types/prisma";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
-export type Employee = {
-  id: string;
-  name?: string | null;
-  image?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  empId?: string | null;
-  position?: string | null;
-  status?: "ACTIVE" | "INACTIVE";
-  departmentId?: string | null;
-  branchId?: string | null;
-  companyId?: string | null;
-  createdBy?: string | null;
-  userId?: string | null;
-  action?: string | null;
-};
-
-
-export const columns: ColumnDef<Employee>[] = [
+export const columns: ColumnDef<EmployeeWithUser>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -52,15 +36,31 @@ export const columns: ColumnDef<Employee>[] = [
     header: "ID",
   },
   {
-    accessorKey: "name",
+    accessorKey: "user.name",
     header: "Name",
   },
   {
     accessorKey: "image",
     header: "Image",
+    cell: ({ row }) => {
+      const url = row.original.image;
+
+      return url ? (
+        <Image
+          src={url}
+          alt="Employee"
+          width={40}
+          height={40}
+          className="rounded-full object-cover"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-gray-200" />
+      );
+    },
+    enableSorting: false,
   },
   {
-    accessorKey: "email",
+    accessorKey: "user.email",
     header: ({ column }) => {
       return (
         <Button

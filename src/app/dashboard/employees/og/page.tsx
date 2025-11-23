@@ -6,9 +6,18 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { SlashIcon } from "lucide-react";
+import { Save, SlashIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import OrgChartClient from "./OrgChartClient";
+import { getAllEmployees, getOrgTree } from "@/actions/org-chart.actions";
 
-function page() {
+export const dynamic = "force-dynamic"; // ensures fresh data
+
+
+
+async function page() {
+  const [employees, tree] = await Promise.all([getAllEmployees(), getOrgTree()]);
+
   return (
     <main className="w-full">
       <Breadcrumb>
@@ -29,11 +38,14 @@ function page() {
       <div className="w-full overflow-x-auto">
         {/* Employees */}
         <div className="mt-4">
-          <div>
+          <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold">Organization Chart</h1>
-            <span className="text-sm">
-              This is company&apos;s organization chart.
-            </span>
+            <div className="flex space-x-2">
+                          <Button variant={"outline"}><Save/> Print</Button>
+                        </div>
+          </div>
+          <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4 mt-4">
+            <OrgChartClient employees={employees} initialTree={tree} />
           </div>
         </div>
       </div>

@@ -194,3 +194,15 @@ model InviteToken {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 }
+
+
+model OrgNode {
+  id         String   @id @default(uuid())
+  employeeId String?  // optional: empty node when no employee assigned yet
+  parentId   String?  // self relation
+  parent     OrgNode? @relation("OrgNodeHierarchy", fields: [parentId], references: [id])
+  children   OrgNode[] @relation("OrgNodeHierarchy")
+  createdAt  DateTime @default(now())
+
+  @@map("org_nodes")
+}

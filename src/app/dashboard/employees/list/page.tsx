@@ -5,37 +5,18 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { FileDown, SlashIcon } from "lucide-react";
+import { SlashIcon } from "lucide-react";
 import React from "react";
 import { DataTable } from "../data-table";
-import { columns, Employee } from "../columns";
-import { Button } from "@/components/ui/button";
-import { prisma } from "@/lib/prisma";
+import { columns } from "../columns";
 import { AddEmployee } from "./AddEmployee";
 import { getDepartmentsAction } from "@/actions/department.actions";
+import { DownloadEmployeesButton } from "./DownloadEmployeeList";
+import { getEmployeesAction } from "@/actions/employee.actions";
 
 async function AllEmployees() {
   const departments = await getDepartmentsAction();
-
-  const employees = await prisma.employee.findMany({
-    // orderBy: { name: "asc" },
-  });
-
-  const emptable: Employee[] = employees.map((employee) => ({
-    id: employee.id,
-    // name: employee.name,
-    image: employee.image,
-    // email: employee.email,
-    phone: employee.phone,
-    empId: employee.empId,
-    position: employee.position,
-    status: employee.status as "ACTIVE" | "INACTIVE",
-    // departmentId: employee.departmentId,
-    // branchId: employee.branchId,
-    // companyId: employee.companyId,
-    // createdBy: employee.createdBy,
-    userId: employee.userId,
-  }));
+  const employees = await getEmployeesAction();
 
   return (
     <main className="w-full">
@@ -60,15 +41,12 @@ async function AllEmployees() {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold">All Employees</h1>
             <div className="flex space-x-2">
-              <Button variant="outline">
-                <FileDown size={20} /> Download
-              </Button>
-
+              <DownloadEmployeesButton employees={employees} />
               <AddEmployee departments={departments} />
             </div>
           </div>
           <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4 mt-4">
-            <DataTable columns={columns} data={emptable} />
+            <DataTable columns={columns} data={employees} />
           </div>
         </div>
       </div>

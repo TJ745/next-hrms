@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { sendEmailAction } from "./send-email.action";
 import { randomBytes } from "crypto";
 import { Prisma } from "@/generated/prisma";
+import { EmployeeWithUser } from "@/types/prisma";
 
 export async function createEmployeeAction(formData: FormData) {
   const headerList = await headers();
@@ -111,7 +112,7 @@ export async function getEmployeeAction(id: string) {
   });
 }
 
-export async function getEmployeesAction() {
+export async function getEmployeesAction(): Promise<EmployeeWithUser[]>  {
   return await prisma.employee.findMany({
   include: {
     user: true,
@@ -123,15 +124,53 @@ export async function getEmployeesAction() {
   });
 }
 
-export async function updateEmployeeAction(id: string, data: Prisma.EmployeeUpdateInput) {
-  return await prisma.employee.update({ 
-    where: { id }, 
-    data, 
-    include: { 
-      user: true, 
-    }, 
+// export async function updateEmployeeAction(id: string, data: Prisma.EmployeeUpdateInput) {
+  // return await prisma.employee.update({
+  //   where: { id },
+  //   data,
+  //   include: {
+  //     user: true,
+  //   },
+  // });
+
+  export async function updateEmployeeAction(
+  employeeId: string,
+  data: {
+    user?: { name?: string; email?: string };
+  } & Omit<Prisma.EmployeeUpdateInput, "user">
+) {
+   return await prisma.employee.update({
+    where: { id:employeeId },
+    data: {
+      phone: data.phone,
+      gender: data.gender,
+      nationality: data.nationality,
+      dateOfBirth: data.dateOfBirth,
+      maritalStatus: data.maritalStatus,
+      address: data.address,
+      empId: data.empId,
+      jobTitle: data.jobTitle,
+      position: data.position,
+      basicSalary: data.basicSalary,
+      allowances: data.allowances,
+      totalSalary: data.totalSalary,
+      status: data.status,
+      emergencyName: data.emergencyName,
+      emergencyPhone: data.emergencyPhone,
+      emergencyRelation: data.emergencyRelation,
+      iqamaNo: data.iqamaNo,
+      iqamaExpiry: data.iqamaExpiry,
+      passportNo: data.passportNo,
+      passportExpiry: data.passportExpiry,
+      joinDate: data.joinDate,
+      contractType: data.contractType,
+      image: data.image,
+      user: data.user ? { update: { ...data.user } } : undefined,
+    },
+    include: { user: true },
   });
 }
+
 
 export async function deleteEmployeeAction(id: string) {
   return await prisma.employee.delete({ where: { id } });

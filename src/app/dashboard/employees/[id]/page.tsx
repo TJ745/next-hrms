@@ -131,19 +131,19 @@ export default async function page({ params }: { params: { id: string } }) {
                 </TabsContent>
 
                 <TabsContent value="job">
-                  <JobForm />
+                  <JobForm employee={employee} />
                 </TabsContent>
 
                 <TabsContent value="payroll">
-                  <PayrollForm />
+                  <PayrollForm employee={employee} />
                 </TabsContent>
 
                 <TabsContent value="documents">
-                  <DocumentsForm />
+                  <DocumentsForm employee={employee} />
                 </TabsContent>
 
                 <TabsContent value="setting">
-                  <SettingForm />
+                  <SettingForm employee={employee} />
                 </TabsContent>
               </Tabs>
             </div>
