@@ -28,23 +28,32 @@ import {
   UserStar,
 } from "lucide-react";
 import React from "react";
-import BranchForm from "./branches/BranchForm";
-import { DataTable } from "./branches/data-table";
-import { Branch, columns } from "./branches/columns";
 import { prisma } from "@/lib/prisma";
-import { ChangePasswordForm } from "@/components/ChangePasswordForm";
-import DepartmentForm from "./departments/DepartmentForm";
-import { Department } from "./departments/columns";
-import { DepartmentTable } from "./departments/data-table";
-import JobTitleForm from "./jobtitles/JobTitleForm";
-import { JobTitleTable } from "./jobtitles/data-table";
-import UserForm from "./users/UserForm";
-import { UserTable } from "./users/data-table";
-import { Employee } from "../columns";
-import { getBranchesAction } from "@/actions/branch.actions";
-import CompanyForm from "./companies/CompanyForm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { DataTable } from "@/components/Data-Table";
+
+import BranchForm from "./branches/BranchForm";
+import { BranchColumns } from "./branches/columns";
+import { getBranchesAction } from "@/actions/branch.actions";
+
+import { ChangePasswordForm } from "@/components/ChangePasswordForm";
+
+import DepartmentForm from "./departments/DepartmentForm";
+import { DepartmentColumns, DepartmentType } from "./departments/columns";
+import { getDepartmentsAction } from "@/actions/department.actions";
+
+import JobTitleForm from "./jobtitles/JobTitleForm";
+import { jobTitleColumns, JobTitleType } from "./jobtitles/columns";
+import { getJobTitleAction } from "@/actions/jobtitle.actions";
+
+import UserForm from "./users/UserForm";
+import { Employee } from "../columns";
+
+import CompanyForm from "./companies/CompanyForm";
+import { UserColumns } from "./users/columns";
+
+
 
 async function Settings() {
   const headersList = await headers();
@@ -52,23 +61,10 @@ async function Settings() {
 
   const branches = await getBranchesAction();
 
-  const table: Branch[] = branches.map((branch) => ({
-    id: branch.id,
-    name: branch.name,
-    phone: branch.phone,
-    address: branch.address,
-    companyId: branch.companyId,
-  }));
 
-  const departments = await prisma.department.findMany({
-    orderBy: { name: "asc" },
-  });
+  const departments = await getDepartmentsAction();
 
-  const dept: Department[] = departments.map((department) => ({
-    id: department.id,
-    name: department.name,
-    branchId: department.branchId,
-  }));
+  const jobtitles = await getJobTitleAction();
 
   const users = await prisma.user.findMany({
     orderBy: { name: "asc" },
@@ -85,6 +81,7 @@ async function Settings() {
   const company = await prisma.company.findUnique({
     where: { id: session?.user.companyId },
   });
+
 
   return (
     <div>
@@ -140,7 +137,6 @@ async function Settings() {
               <CardContent className="grid gap-6">
                 <CompanyForm company={company} />
               </CardContent>
-              
             </Card>
           </TabsContent>
 
@@ -158,7 +154,7 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                <DataTable columns={columns} data={table} />
+                <DataTable columns={BranchColumns} data={branches} />
               </div>
             </div>
           </TabsContent>
@@ -177,7 +173,7 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                <DepartmentTable columns={columns} data={dept} />
+                <DataTable columns={DepartmentColumns} data={departments as DepartmentType[]} />
               </div>
             </div>
           </TabsContent>
@@ -196,7 +192,7 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                {/* <JobTitleTable columns={columns} data={dept} /> */}
+                <DataTable columns={jobTitleColumns} data={jobtitles as JobTitleType[]} />
               </div>
             </div>
           </TabsContent>
@@ -215,7 +211,7 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                <UserTable columns={columns} data={employees} />
+                <DataTable columns={UserColumns} data={employees} />
               </div>
             </div>
           </TabsContent>

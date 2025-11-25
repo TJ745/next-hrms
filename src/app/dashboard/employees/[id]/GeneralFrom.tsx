@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Employee, User } from "@/generated/prisma";
 import { Pencil, Save, X } from "lucide-react";
-import React, { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import React, {  useState } from "react";
 import { toast } from "sonner";
 
 type GeneralFormProps = {
@@ -15,117 +17,32 @@ type GeneralFormProps = {
 
 function GeneralFrom({ employee }: GeneralFormProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  const [formData, setFormData] = useState({
-    name: employee.user.name || "",
-    email: employee.user.email || "",
-    phone: employee.phone || "",
-    gender: employee.gender || "",
-    nationality: employee.nationality || "",
-    dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
-    maritalStatus: employee.maritalStatus || "",
-    address: employee.address || "",
-    empId: employee.empId || "",
-    jobTitle: employee.jobTitle || "",
-    position: employee.position || "",
-    basicSalary: employee.basicSalary?.toString() || "",
-    allowances: employee.allowances?.toString() || "",
-    totalSalary: employee.totalSalary?.toString() || "",
-    status: employee.status || "",
-    emergencyName: employee.emergencyName || "",
-    emergencyPhone: employee.emergencyPhone || "",
-    emergencyRelation: employee.emergencyRelation || "",
-    iqamaNo: employee.iqamaNo || "",
-    iqamaExpiry: employee.iqamaExpiry?.toISOString().split("T")[0] || "",
-    passportNo: employee.passportNo || "",
-    passportExpiry: employee.passportExpiry?.toISOString().split("T")[0] || "",
-    joinDate: employee.joinDate?.toISOString().split("T")[0] || "",
-    contractType: employee.contractType || "",
-  });
-
-  const handleChange = (key: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleEditClick = () => {
-  // Reset formData to current employee values when editing starts
-  setFormData({
-    name: employee.user.name || "",
-    email: employee.user.email || "",
-    phone: employee.phone || "",
-    gender: employee.gender || "",
-    nationality: employee.nationality || "",
-    dateOfBirth: employee.dateOfBirth?.toISOString().split("T")[0] || "",
-    maritalStatus: employee.maritalStatus || "",
-    address: employee.address || "",
-    empId: employee.empId || "",
-    jobTitle: employee.jobTitle || "",
-    position: employee.position || "",
-    basicSalary: employee.basicSalary?.toString() || "",
-    allowances: employee.allowances?.toString() || "",
-    totalSalary: employee.totalSalary?.toString() || "",
-    status: employee.status || "",
-    emergencyName: employee.emergencyName || "",
-    emergencyPhone: employee.emergencyPhone || "",
-    emergencyRelation: employee.emergencyRelation || "",
-    iqamaNo: employee.iqamaNo || "",
-    iqamaExpiry: employee.iqamaExpiry?.toISOString().split("T")[0] || "",
-    passportNo: employee.passportNo || "",
-    passportExpiry: employee.passportExpiry?.toISOString().split("T")[0] || "",
-    joinDate: employee.joinDate?.toISOString().split("T")[0] || "",
-    contractType: employee.contractType || "",
-  });
-  setIsEditing(true);
-};
-
-  const handleSave = async () => {
-    startTransition(async () => {
-      try {
-        await updateEmployeeAction(employee.id, {
-  ...formData,
-  basicSalary: formData.basicSalary ? parseFloat(formData.basicSalary) : null,
-  allowances: formData.allowances ? parseFloat(formData.allowances) : null,
-  totalSalary: formData.totalSalary ? parseFloat(formData.totalSalary) : null,
-  dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth) : null,
-  iqamaExpiry: formData.iqamaExpiry ? new Date(formData.iqamaExpiry) : null,
-  passportExpiry: formData.passportExpiry ? new Date(formData.passportExpiry) : null,
-  joinDate: formData.joinDate ? new Date(formData.joinDate) : null,
-  user: {
-    name: formData.name,
-    email: formData.email,
-  },
-});
-        toast.success("Employee updated successfully!");
-        setIsEditing(false);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to update employee");
-      }
-    });
-  };
-
+    const [isPending, setIsPending] = useState(false);
+    const router= useRouter();
+ 
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+      e.preventDefault();
   
-
-  const renderInput = (label: string, key: string, type: string = "text") => (
-    <div className="flex items-center">
-      <Label className="w-[140px] text-muted-foreground">{label}</Label>
-      {isEditing ? (
-        <Input
-          type={type}
-          value={formData[key as keyof typeof formData]}
-          onChange={(e) => handleChange(key, e.target.value)}
-          className="max-w-[220px]"
-        />
-      ) : (
-        <span className="text-sm text-foreground font-medium truncate max-w-[220px]">{formData[key as keyof typeof formData]}</span>
-      )}
-    </div>
-  );
+      setIsPending(true);
+  
+      const formData = new FormData(e.target as HTMLFormElement);
+      const { error } = await updateEmployeeAction(formData);
+  
+      if (error) {
+        toast.error(error);
+        setIsPending(false);
+      } else {
+        toast.success("Company updated successfully.");
+        router.refresh();
+          setIsPending(false);
+      }
+    }
 
   return (
     <div>
       <Card className="mt-4">
+         <form onSubmit={handleSubmit}>
+
         <CardHeader className="flex items-center justify-between h-2">
           <CardTitle>Personal Info</CardTitle>
           {isEditing ? (
@@ -139,8 +56,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               </Button>
               <Button
                 variant="default"
-                size="icon"
-                onClick={handleSave}
+                size="icon" type="submit"
                 disabled={isPending}
               >
                 <Save className="h-4 w-4" />
@@ -150,29 +66,194 @@ function GeneralFrom({ employee }: GeneralFormProps) {
             <Button
               variant="link"
               size="icon"
-              onClick={handleEditClick}
+              onClick={()=>setIsEditing(true)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
           )}
         </CardHeader>
+        <br />
         <hr />
         <CardContent>
           {/* Personal Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-8">
-        {renderInput("Full Name", "name")}
-        {renderInput("Email", "email", "email")}
-        {renderInput("Phone", "phone")}
-        {renderInput("Gender", "gender")}
-        {renderInput("Nationality", "nationality")}
-        {renderInput("Date of Birth", "dateOfBirth", "date")}
-        {renderInput("Marital Status", "maritalStatus")}
-        {renderInput("Address", "address")}
-        {renderInput("Health Insurance", "address")}
-        {renderInput("Personal Tax ID", "address")}
-        {renderInput("Social Insurance", "address")}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-8 mt-2">
+        
+  <Input type="hidden" name="employeeId" value={employee.id} />
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Phone</Label>
+          <Input
+            name="phone"
+            defaultValue={employee.phone || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Gender</Label>
+          <Input
+            name="gender"
+            defaultValue={employee.gender || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Nationality</Label>
+          <Input
+            name="nationality"
+            defaultValue={employee.nationality || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Marital Status</Label>
+          <Input
+            name="maritalStatus"
+            defaultValue={employee.maritalStatus || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Address</Label>
+          <Input
+            name="address"
+            defaultValue={employee.address || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Emergency Name</Label>
+          <Input
+            name="emergencyName"
+            defaultValue={employee.emergencyName || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Emergency Phone</Label>
+          <Input
+            name="emergencyPhone"
+            defaultValue={employee.emergencyPhone || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Emergency Relation</Label>
+          <Input
+            name="emergencyRelation"
+            defaultValue={employee.emergencyRelation || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Iqama Number</Label>
+          <Input
+            name="iqamaNo"
+            defaultValue={employee.iqamaNo || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Iqama Expiry</Label>
+          <Input
+            name="iqamaExpiry"
+            type="date"
+            defaultValue={employee.iqamaExpiry?.toISOString().split("T")[0]}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Passport Number</Label>
+          <Input
+            name="passportNo"
+            defaultValue={employee.passportNo || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Passport Expiry</Label>
+          <Input
+            name="passportExpiry"
+            type="date"
+            defaultValue={employee.passportExpiry?.toISOString().split("T")[0]}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Job Title</Label>
+          <Input
+            name="jobTitle"
+            defaultValue={employee.jobTitle || ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Join Date</Label>
+          <Input
+            type="date"
+            name="joinDate"
+            defaultValue={employee.joinDate?.toISOString().split("T")[0]}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Basic Salary</Label>
+          <Input
+            name="basicSalary"
+            type="number"
+            defaultValue={employee.basicSalary ?? ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Allowances</Label>
+          <Input
+            name="allowances"
+            type="number"
+            defaultValue={employee.allowances ?? ""}
+            disabled={!isEditing}
+          />
+        </div>
+
+        <div className="flex items-center ">
+          <Label  className="w-[140px] text-muted-foreground">Total Salary</Label>
+          <Input
+            name="totalSalary"
+            type="number"
+            defaultValue={employee.totalSalary ?? ""}
+            disabled={!isEditing}
+          />
+        </div>
+<Label  className="w-[140px] text-muted-foreground">Status</Label>
+
+  <Select name="status">
+    <SelectTrigger>
+      <SelectValue placeholder="Select Status" />
+    </SelectTrigger>
+    <SelectContent>
+            <SelectGroup>
+              <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Terminated">Terminated</SelectItem>
+              </SelectGroup>
+    </SelectContent>
+  </Select>
+
       </div>
         </CardContent>
+</form>
       </Card>
       <Card className="mt-4">
         <CardHeader className="flex items-center justify-between h-2">

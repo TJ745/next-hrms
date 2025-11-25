@@ -7,12 +7,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SlashIcon } from "lucide-react";
 import React from "react";
-import { DataTable } from "../data-table";
-import { columns } from "../columns";
+import { DataTable } from "@/components/Data-Table";
+
+import { EmployeeColumns } from "../columns";
 import { AddEmployee } from "./AddEmployee";
-import { getDepartmentsAction } from "@/actions/department.actions";
 import { DownloadEmployeesButton } from "./DownloadEmployeeList";
+
 import { getEmployeesAction } from "@/actions/employee.actions";
+import { getDepartmentsAction } from "@/actions/department.actions";
 
 async function AllEmployees() {
   const departments = await getDepartmentsAction();
@@ -46,7 +48,7 @@ async function AllEmployees() {
             </div>
           </div>
           <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4 mt-4">
-            <DataTable columns={columns} data={employees} />
+            <DataTable columns={EmployeeColumns} data={employees} />
           </div>
         </div>
       </div>

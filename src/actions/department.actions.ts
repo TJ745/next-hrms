@@ -43,7 +43,7 @@ export async function createDepartmentAction(formData: FormData) {
       });
       
   
-      return { success: true };
+      return { success: true, return: department };
     } catch (err) {
       console.error(err);
       return { error: "Failed to create department" };
@@ -52,7 +52,9 @@ export async function createDepartmentAction(formData: FormData) {
 
 export async function getDepartmentsAction() {
   return await prisma.department.findMany({
-    
+    include:{
+      branch:true
+    }
   });
 }
 

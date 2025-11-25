@@ -10,7 +10,7 @@ import { ArrowUpDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export const columns: ColumnDef<EmployeeWithUser>[] = [
+export const EmployeeColumns: ColumnDef<EmployeeWithUser>[] = [
   {
     id: "select",
     header: ({ table }) => (

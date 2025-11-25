@@ -8,17 +8,16 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Phone, SlashIcon } from "lucide-react";
-import Image from "next/image";
 import React from "react";
-import avatar from "../../../../../public/image/default.jpg";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import GeneralFrom from "./GeneralFrom";
 import JobForm from "./JobForm";
 import PayrollForm from "./PayrollForm";
 import DocumentsForm from "./DocumentsForm";
 import SettingForm from "./SettingForm";
 import { getEmployeeAction } from "@/actions/employee.actions";
+import EmpImage from "./EmpImage";
+import Image from "next/image";
 
 
 
@@ -69,50 +68,62 @@ export default async function page({ params }: { params: { id: string } }) {
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="col-span-1 bg-primary-foreground rounded-xl">
               <Card className="flex flex-col items-center p-4 text-center shadow-sm transition hover:shadow-md h-full">
-                <Image
-                  src={employee.image || avatar}
-                  alt={employee.id}
-                  width={70}
-                  height={70}
-                  className="rounded-full object-cover"
-                />
+                <Image src={`${employee.image}`} alt="Employee Image" width={100} height={100} className="rounded-2xl" />
                 <CardContent className="space-y-4">
                   <h3 className="text-base font-semibold">{employee.user.name}</h3>
                   <p className="text-sm text-gray-500">
                     {employee.position || "—"}
                   </p>
-                  {employee.status && (
                     <Badge
-                      className={`${
-                        employee.status === "Active"
-                          ? "bg-green-200 text-green-800"
-                          : "bg-red-200 text-red-800"
-                      }`}
-                    >
-                      {employee.status}
-                    </Badge>
-                  )}
+        variant={employee.status === "ACTIVE" ? "success" : "destructive"}
+        className="px-2 py-1"
+        >
+        {employee.status === "ACTIVE" ? "Active" : "Inactive"}
+      </Badge>
                   <hr />
-                  <p className="text-xs text-gray-400 flex items-center justify-center gap-2 mt-2">
-                    <Mail size={14} /> {employee.user.email}
+                  <div className="flex flex-col items-start gap-2">
+                    <div className="flex items-center gap-2">
+
+                  <p className="text-xs text-gray-400">
+                    <Mail size={14} />
                   </p>
-                  <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
-                    <Phone size={14} /> {employee.phone}
+                  <span className="text-xs">
+{employee.user.email}
+                  </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                  <p className="text-xs text-gray-400">
+                    <Phone size={14} />
                   </p>
+                  <span className="text-xs">
+                    {employee.phone}
+                  </span>
+                    </div>
+
+                  </div>
                   <hr />
-                  <p className="text-xs text-gray-400 flex items-center justify-center gap-2 mt-2">
+                  <div className="flex flex-col items-start gap-2 justify-between">
+                  <p className="w-12 text-xs text-gray-400 gap-2">
                     Department
                   </p>
+                    <span className="text-sm">
+                    {employee.user.department?.name}
+                    </span>
                   <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
                     Branch
                   </p>
+                    <span className="text-sm">
+                    {employee.user.branch?.name}
+                    </span>
                   <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
                     Manager
                   </p>
-                  {/* {employee.department && (
-                    <Badge variant="outline">{employee.department.name}</Badge>
-                  )} */}
-                  <Button className="w-full mt-6">Action</Button>
+                  <span className="text-sm">
+                    {"N/A"}
+                  </span>
+                  </div>
+                <EmpImage employeeId={employee.id} />
                 </CardContent>
               </Card>
             </div>

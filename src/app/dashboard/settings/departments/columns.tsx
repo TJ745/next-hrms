@@ -4,15 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 
-export type Department = {
+export type DepartmentType = {
   id: string;
   name: string;
   branchId: string;
-  createdBy: string;
+  branch: {name:string};
+  createdBy?: string;
   action?: string;
 };
 
-export const columns: ColumnDef<Department>[] = [
+export const DepartmentColumns: ColumnDef<DepartmentType>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -40,6 +41,10 @@ export const columns: ColumnDef<Department>[] = [
   {
     accessorKey: "name",
     header: "Name",
+  },
+  {
+    accessorKey: "branch.name",
+    header: "Branch",
   },
   {
     accessorKey: "action",

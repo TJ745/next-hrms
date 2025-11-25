@@ -23,7 +23,7 @@ function JobForm({ employee }: GeneralFormProps) {
     <div>
       <Card className="mt-4">
         <CardHeader className="flex items-center justify-between h-2">
-          <CardTitle>Address</CardTitle>
+          <CardTitle>Employment Information</CardTitle>
           {isEditing ? (
             <div className="flex gap-2">
               <Button
@@ -46,7 +46,7 @@ function JobForm({ employee }: GeneralFormProps) {
             <Button
               variant="link"
               size="icon"
-              // onClick={() => setIsEditing(true)}
+              onClick={() => setIsEditing(true)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -56,36 +56,102 @@ function JobForm({ employee }: GeneralFormProps) {
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
           <div className="flex items-center">
             <Label className="w-[140px] text-muted-foreground">
-              Primary Address
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-            
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">Country</Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              State/Province
+              Employee ID
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
               {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">City</Label>
+            <Label className="w-[140px] text-muted-foreground">Service Year</Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
               {employee.user.name}
             </span>
           </div>
           <div className="flex items-center ">
             <Label className="w-[140px] text-muted-foreground">
-              Postal Code
+              Join Date
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Job Title
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Employment Type
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Direct Manager
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Direct Manager
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Contract Type
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Contract Start Date
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Contract End Date
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Probation Period
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Working Hours
+            </Label>
+            <span className="text-sm text-right text-foreground font-medium truncate">
+              {employee.user.name}
+            </span>
+          </div>
+          <div className="flex items-center ">
+            <Label className="w-[140px] text-muted-foreground">
+              Working Days
             </Label>
             <span className="text-sm text-right text-foreground font-medium truncate">
               {employee.user.name}

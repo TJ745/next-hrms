@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-export type Employee = {
+export type UserType = {
   id: string;
   name: string;
   email: string;
@@ -13,7 +13,7 @@ export type Employee = {
   action?: string;
 };
 
-export const columns: ColumnDef<Employee>[] = [
+export const UserColumns: ColumnDef<UserType>[] = [
   {
     id: "select",
     header: ({ table }) => (

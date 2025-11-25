@@ -34,7 +34,7 @@ export async function createBranchAction(formData: FormData) {
     }
     });
 
-    return { success: true};
+    return { success: true, return: branch};
   } catch (err) {
     console.error(err);
     return { error: "Failed to create branch" };
@@ -46,6 +46,9 @@ export async function getBranchesAction() {
   const session = await auth.api.getSession({ headers: headerList });
   return prisma.branch.findMany({
     where: { companyId: session?.user.companyId  },
+    include:{
+      company: true,
+    }
   });
 }
 

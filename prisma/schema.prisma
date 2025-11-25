@@ -14,6 +14,11 @@ enum UserRole {
   EMPLOYEE
 }
 
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
 model User {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
@@ -40,6 +45,8 @@ model User {
 
   employee     Employee?
   inviteTokens InviteToken[]
+
+  jobTitles JobTitle[]
 
   @@map("users")
 }
@@ -205,4 +212,18 @@ model OrgNode {
   createdAt  DateTime @default(now())
 
   @@map("org_nodes")
+}
+
+model JobTitle {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name   String
+  status Status @default(ACTIVE)
+
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@map("jobtitles")
 }

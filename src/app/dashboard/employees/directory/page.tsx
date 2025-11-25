@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { SlashIcon } from "lucide-react";
 import React from "react";
+
 import { EmployeeCard } from "./EmployeeCard";
 import { getEmployeesAction } from "@/actions/employee.actions";
 
@@ -35,11 +36,9 @@ async function Directory() {
         <div className="mt-4">
           <div>
             <h1 className="text-xl font-bold">Employees Directory</h1>
-            <span className="text-sm">This is employee directory</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             {/* Directory content goes here */}
-
             {employees.map((emp) => (
               <EmployeeCard key={emp.id} employee={emp} />
             ))}

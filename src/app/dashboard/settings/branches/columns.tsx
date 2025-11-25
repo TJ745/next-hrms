@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
-export type Branch = {
+export type BranchType = {
   id: string;
   name: string;
   address: string | null;
@@ -14,7 +14,7 @@ export type Branch = {
   action?: string;
 };
 
-export const columns: ColumnDef<Branch>[] = [
+export const BranchColumns: ColumnDef<BranchType>[] = [
   {
     id: "select",
     header: ({ table }) => (

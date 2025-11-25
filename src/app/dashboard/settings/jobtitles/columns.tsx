@@ -1,35 +1,33 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-export type JobTitle = {
+export type JobTitleType = {
   id: string;
   name: string;
-  departmentId: string;
-  createdBy: string;
-  action?: string;
+  status: string;
+  createdById?: string;
+  createdBy?: {
+    name: string;
+  };
 };
 
-export const columns: ColumnDef<JobTitle>[] = [
+export const jobTitleColumns: ColumnDef<JobTitleType>[] = [
   {
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected()}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
       />
     ),
   },
@@ -42,24 +40,37 @@ export const columns: ColumnDef<JobTitle>[] = [
     header: "Job Title",
   },
   {
-    accessorKey: "action",
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => {
+    const status: string = row.getValue("status");
+
+    return (
+      <Badge
+        variant={status === "ACTIVE" ? "success" : "destructive"}
+        className="px-2 py-1"
+      >
+        {status === "ACTIVE" ? "Active" : "Inactive"}
+      </Badge>
+    );
+  },
+  },
+  {
+    accessorKey: "createdBy.name",
+    header: "Created By",
+  },
+  {
+    id: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const branch = row.original;
+      const job = row.original;
+
       return (
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => console.log("View", branch.id)}
-          >
+          <Button size="sm" variant="outline" onClick={() => console.log("View", job.id)}>
             View
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => console.log("Delete", branch.id)}
-          >
+          <Button size="sm" variant="destructive" onClick={() => console.log("Delete", job.id)}>
             Delete
           </Button>
         </div>
