@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Employee, User } from "@/generated/prisma";
 import { Pencil, Save, X } from "lucide-react";
@@ -68,6 +69,67 @@ function JobForm({ employee }: GeneralFormProps) {
               {employee.user.name}
             </span>
           </div>
+
+          <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Job Title
+                </Label>
+                <Input
+                  name="jobTitle"
+                  defaultValue={employee.jobTitle || ""}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Join Date
+                </Label>
+                <Input
+                  type="date"
+                  name="joinDate"
+                  defaultValue={employee.joinDate?.toISOString().split("T")[0]}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Basic Salary
+                </Label>
+                <Input
+                  name="basicSalary"
+                  type="number"
+                  defaultValue={employee.basicSalary ?? ""}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Allowances
+                </Label>
+                <Input
+                  name="allowances"
+                  type="number"
+                  defaultValue={employee.allowances ?? ""}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Total Salary
+                </Label>
+                <Input
+                  name="totalSalary"
+                  type="number"
+                  defaultValue={employee.totalSalary ?? ""}
+                  disabled={!isEditing}
+                />
+              </div>
+
+
           <div className="flex items-center ">
             <Label className="w-[140px] text-muted-foreground">
               Join Date
