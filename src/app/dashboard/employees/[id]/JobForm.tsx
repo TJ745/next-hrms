@@ -1,17 +1,22 @@
 "use client";
-
+import { updateEmployeeAction } from "@/actions/employee.actions";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Employee, User } from "@/generated/prisma";
 import { Pencil, Save, X } from "lucide-react";
-import React, { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { toast } from "sonner";
 
 type GeneralFormProps = {
   employee: Employee & { user: User };
@@ -19,207 +24,378 @@ type GeneralFormProps = {
 
 function JobForm({ employee }: GeneralFormProps) {
   const [isEditing, setIsEditing] = useState(false);
-    const [isPending, startTransition] = useTransition();
+
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    setIsPending(true);
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const { error } = await updateEmployeeAction(formData);
+
+    if (error) {
+      toast.error(error);
+      setIsPending(false);
+    } else {
+      toast.success("Employee updated successfully.");
+      router.refresh();
+      setIsPending(false);
+
+      setIsEditing(false);
+    }
+  }
+
+  const contractStartDate = employee.joinDate;
+
+  const end = new Date(employee.joinDate || "");
+  end.setFullYear(end.getFullYear() + Number(employee.contractValidity));
+  const contractEndDate = end.toISOString().split("T")[0];
+
+  const probEnd = new Date(employee.joinDate || "");
+  probEnd.setMonth(probEnd.getMonth() + Number(employee.probationPeriod));
+  const probationEndDate = probEnd.toISOString().split("T")[0];
+
+  const joinDate = new Date(employee.joinDate || "");
+  const today = new Date();
+
+  let years = today.getFullYear() - joinDate.getFullYear();
+  let months = today.getMonth() - joinDate.getMonth();
+  let days = today.getDate() - joinDate.getDate();
+
+  // Adjust days
+  if (days < 0) {
+    months--;
+    const prevMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      0
+    ).getDate();
+    days += prevMonth;
+  }
+
+  // Adjust months
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
   return (
     <div>
       <Card className="mt-4">
-        <CardHeader className="flex items-center justify-between h-2">
-          <CardTitle>Employment Information</CardTitle>
-          {isEditing ? (
-            <div className="flex gap-2">
+        <form onSubmit={handleSubmit}>
+          <CardHeader className="flex items-center justify-between h-2">
+            <CardTitle>Employement Info</CardTitle>
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditing(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="icon"
+                  type="submit"
+                  disabled={isPending}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
               <Button
-                variant="ghost"
+                variant="link"
                 size="icon"
-                onClick={() => setIsEditing(false)}
+                onClick={() => setIsEditing(true)}
               >
-                <X className="h-4 w-4" />
+                <Pencil className="h-4 w-4" />
               </Button>
-              <Button
-                variant="default"
-                size="icon"
-                // onClick={handleSave}
-                disabled={isPending}
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="link"
-              size="icon"
-              onClick={() => setIsEditing(true)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          )}
-        </CardHeader>
-        <hr />
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-          <div className="flex items-center">
-            <Label className="w-[140px] text-muted-foreground">
-              Employee ID
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">Service Year</Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
+            )}
+          </CardHeader>
+          <br />
+          <hr />
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-8 mt-2">
+              <Input type="hidden" name="employeeId" value={employee.id} />
 
-          <div className="flex items-center ">
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Employee ID
+                </Label>
+                {isEditing ? (
+                  <Input
+                    name="empId"
+                    defaultValue={employee.empId || ""}
+                    disabled={!isEditing}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.empId || "-"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Job Title
                 </Label>
-                <Input
-                  name="jobTitle"
-                  defaultValue={employee.jobTitle || ""}
-                  disabled={!isEditing}
-                />
+                {isEditing ? (
+                  <Input
+                    name="jobTitle"
+                    defaultValue={employee.jobTitle || ""}
+                    disabled={!isEditing}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.jobTitle || "-"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Direct Manager
+                </Label>
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {employee.user.name}
+                </span>
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Department
+                </Label>
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {employee.user.name}
+                </span>
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Branch
+                </Label>
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {employee.user.name}
+                </span>
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Employment Type
+                </Label>
+                {isEditing ? (
+                  <Select
+                    name="employmentType"
+                    defaultValue={employee.employmentType || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Employement Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="fullTime">Full-Time</SelectItem>
+                        <SelectItem value="partTime">Part-Time</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.employmentType || "-"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Join Date
                 </Label>
-                <Input
-                  type="date"
-                  name="joinDate"
-                  defaultValue={employee.joinDate?.toISOString().split("T")[0]}
-                  disabled={!isEditing}
-                />
+                {isEditing ? (
+                  <Input
+                    name="joinDate"
+                    type="date"
+                    defaultValue={
+                      employee.joinDate?.toISOString().split("T")[0]
+                    }
+                    disabled={!isEditing}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.joinDate?.toISOString().split("T")[0] || "-"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
-                  Basic Salary
+                  Contract Validity
                 </Label>
-                <Input
-                  name="basicSalary"
-                  type="number"
-                  defaultValue={employee.basicSalary ?? ""}
-                  disabled={!isEditing}
-                />
+                {isEditing ? (
+                  <Select
+                    name="contractValidity"
+                    defaultValue={employee.contractValidity || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Contract Validity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="1">1 Year</SelectItem>
+                        <SelectItem value="2">2 Years</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.contractValidity || "-"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
-                  Allowances
+                  Contract Start Date
                 </Label>
-                <Input
-                  name="allowances"
-                  type="number"
-                  defaultValue={employee.allowances ?? ""}
-                  disabled={!isEditing}
-                />
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {contractStartDate?.toISOString().split("T")[0] || "-"}
+                </span>
               </div>
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
-                  Total Salary
+                  Contract End Date
                 </Label>
-                <Input
-                  name="totalSalary"
-                  type="number"
-                  defaultValue={employee.totalSalary ?? ""}
-                  disabled={!isEditing}
-                />
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {contractEndDate || "-"}
+                </span>
               </div>
 
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Probation Period
+                </Label>
+                {isEditing ? (
+                  <Select
+                    name="probationPeriod"
+                    defaultValue={employee.probationPeriod || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Working Days" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="3">3 Months</SelectItem>
+                        <SelectItem value="6">6 Months</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.probationPeriod || "-"}
+                  </span>
+                )}
+              </div>
 
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Join Date
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Job Title
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Employment Type
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Direct Manager
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Direct Manager
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Contract Type
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Contract Start Date
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Contract End Date
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Probation Period
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Probation End Date
+                </Label>
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {probationEndDate || "-"}
+                </span>
+              </div>
 
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Working Hours
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Working Days
-            </Label>
-            <span className="text-sm text-right text-foreground font-medium truncate">
-              {employee.user.name}
-            </span>
-          </div>
-        </CardContent>
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Service Year
+                </Label>
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {`${years} Years ${months} Months ${days} Days`}
+                </span>
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Working Hours
+                </Label>
+                {isEditing ? (
+                  <Select
+                    name="workingHours"
+                    defaultValue={employee.workingHours || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Working Hours" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="07:00 am to 04:00 pm">
+                          07:00 am to 04:00 pm
+                        </SelectItem>
+                        <SelectItem value="08:30 am to 06:00 pm">
+                          08:30 am to 06:00 pm
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.workingHours || "-"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Working Days
+                </Label>
+                {isEditing ? (
+                  <Select
+                    name="workingDays"
+                    defaultValue={employee.workingDays || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Working Days" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="5 Days per week">
+                          5 Days per week
+                        </SelectItem>
+                        <SelectItem value="6 Days per week">
+                          6 Days per week
+                        </SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.workingDays || "-"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Work Location
+                </Label>
+                {isEditing ? (
+                  <Input
+                    name="workLocation"
+                    defaultValue={employee.workLocation || ""}
+                    disabled={!isEditing}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.workLocation || "-"}
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </form>
       </Card>
     </div>
   );

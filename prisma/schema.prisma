@@ -158,7 +158,6 @@ model Employee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  empId         String?
   image         String?
   phone         String?
   gender        String?
@@ -176,13 +175,31 @@ model Employee {
   passportNo     String?
   passportExpiry DateTime?
 
-  jobTitle     String?
-  joinDate     DateTime?
-  contractType String? // Full-time, Part-time, Contract
-  position     String?
-  basicSalary  Float?
-  allowances   Float?
-  totalSalary  Float?
+  empId            String?
+  jobTitle         String?
+  employmentType   String? // Full-time, Part-time, Contract
+  joinDate         DateTime?
+  contractValidity String? // in months
+  probationPeriod  String? // in months
+  workingHours     String?
+  workingDays      String?
+  workLocation     String?
+
+  bankName    String?
+  bankAccount String?
+  bankIBAN    String?
+
+  basicSalary             Float?
+  housingAllowance        Float?
+  transportationAllowance Float?
+  foodAllowance           Float?
+  mobileAllowance         Float?
+  otherAllowance          Float?
+
+  insuranceName       String?
+  insuranceCategory   String? // e.g., Health, Dental, Vision
+  insuranceIssueDate  DateTime?
+  insuranceExpiryDate DateTime?
 
   status String? // Active, Terminated, etc.
 
@@ -202,14 +219,13 @@ model InviteToken {
   user   User   @relation(fields: [userId], references: [id])
 }
 
-
 model OrgNode {
-  id         String   @id @default(uuid())
-  employeeId String?  // optional: empty node when no employee assigned yet
-  parentId   String?  // self relation
-  parent     OrgNode? @relation("OrgNodeHierarchy", fields: [parentId], references: [id])
+  id         String    @id @default(uuid())
+  employeeId String? // optional: empty node when no employee assigned yet
+  parentId   String? // self relation
+  parent     OrgNode?  @relation("OrgNodeHierarchy", fields: [parentId], references: [id])
   children   OrgNode[] @relation("OrgNodeHierarchy")
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
 
   @@map("org_nodes")
 }
@@ -223,7 +239,7 @@ model JobTitle {
   status Status @default(ACTIVE)
 
   createdById String
-  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@map("jobtitles")
 }

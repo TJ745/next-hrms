@@ -183,87 +183,193 @@ export async function getEmployeesAction(): Promise<EmployeeWithUser[]>  {
 //   });
 // }
 
+// export async function updateEmployeeAction(formData: FormData) {
+//   try{
+//   const headersList = await headers();
+//   const session = await auth.api.getSession({ headers: headersList });
+
+//   if (!session || session.user.role !== "ADMIN") {
+//     throw new Error("Unauthorized");
+//   }
+
+//   const employeeId = formData.get("employeeId")?.toString();
+//   if (!employeeId) throw new Error("Employee ID missing");
+
+//   // Helper for dates
+//   const parseDate = (v: FormDataEntryValue | null) =>
+//     v ? new Date(v.toString()) : null;
+
+//   // Extract Employee fields
+//   const data = {
+//     empId: formData.get("empId")?.toString() || null,
+//     phone: formData.get("phone")?.toString() || null,
+//     gender: formData.get("gender")?.toString() || null,
+//     nationality: formData.get("nationality")?.toString() || null,
+//     dateOfBirth: parseDate(formData.get("dateOfBirth")),
+//     maritalStatus: formData.get("maritalStatus")?.toString() || null,
+//     address: formData.get("address")?.toString() || null,
+
+//     emergencyName: formData.get("emergencyName")?.toString() || null,
+//     emergencyPhone: formData.get("emergencyPhone")?.toString() || null,
+//     emergencyRelation: formData.get("emergencyRelation")?.toString() || null,
+
+//     iqamaNo: formData.get("iqamaNo")?.toString() || null,
+//     iqamaExpiry: parseDate(formData.get("iqamaExpiry")),
+//     passportNo: formData.get("passportNo")?.toString() || null,
+//     passportExpiry: parseDate(formData.get("passportExpiry")),
+
+//     jobTitle: formData.get("jobTitle")?.toString() || null,
+//     joinDate: parseDate(formData.get("joinDate")),
+//     contractType: formData.get("contractType")?.toString() || null,
+//     position: formData.get("position")?.toString() || null,
+//     basicSalary: formData.get("basicSalary")
+//       ? Number(formData.get("basicSalary"))
+//       : null,
+//     allowances: formData.get("allowances")
+//       ? Number(formData.get("allowances"))
+//       : null,
+//     totalSalary: formData.get("totalSalary")
+//       ? Number(formData.get("totalSalary"))
+//       : null,
+
+//     status: formData.get("status")?.toString() || null,
+//   };
+
+//   // User fields
+//   const userUpdate = {
+//     name: formData.get("userName")?.toString(),
+//     email: formData.get("userEmail")?.toString(),
+//   };
+
+//   // Remove empty values for user
+//   Object.keys(userUpdate).forEach((key) => {
+//     if (!userUpdate[key as keyof typeof userUpdate]) {
+//       delete userUpdate[key as keyof typeof userUpdate];
+//     }
+//   });
+
+//   const updated = await prisma.employee.update({
+//     where: { id: employeeId },
+//     data: {
+//       ...data,
+//       user: Object.keys(userUpdate).length
+//         ? { update: userUpdate }
+//         : undefined,
+//     },
+//     include: { user: true },
+//   });
+
+//   return { success: true, employee: updated };
+// } catch (err) {
+//   return { error: "Failed to update employee" };
+// }
+// }
+
 export async function updateEmployeeAction(formData: FormData) {
-  try{
-  const headersList = await headers();
-  const session = await auth.api.getSession({ headers: headersList });
+  try {
+    const headersList = await headers();
+    const session = await auth.api.getSession({ headers: headersList });
 
-  if (!session || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
-
-  const employeeId = formData.get("employeeId")?.toString();
-  if (!employeeId) throw new Error("Employee ID missing");
-
-  // Helper for dates
-  const parseDate = (v: FormDataEntryValue | null) =>
-    v ? new Date(v.toString()) : null;
-
-  // Extract Employee fields
-  const data = {
-    empId: formData.get("empId")?.toString() || null,
-    phone: formData.get("phone")?.toString() || null,
-    gender: formData.get("gender")?.toString() || null,
-    nationality: formData.get("nationality")?.toString() || null,
-    dateOfBirth: parseDate(formData.get("dateOfBirth")),
-    maritalStatus: formData.get("maritalStatus")?.toString() || null,
-    address: formData.get("address")?.toString() || null,
-
-    emergencyName: formData.get("emergencyName")?.toString() || null,
-    emergencyPhone: formData.get("emergencyPhone")?.toString() || null,
-    emergencyRelation: formData.get("emergencyRelation")?.toString() || null,
-
-    iqamaNo: formData.get("iqamaNo")?.toString() || null,
-    iqamaExpiry: parseDate(formData.get("iqamaExpiry")),
-    passportNo: formData.get("passportNo")?.toString() || null,
-    passportExpiry: parseDate(formData.get("passportExpiry")),
-
-    jobTitle: formData.get("jobTitle")?.toString() || null,
-    joinDate: parseDate(formData.get("joinDate")),
-    contractType: formData.get("contractType")?.toString() || null,
-    position: formData.get("position")?.toString() || null,
-    basicSalary: formData.get("basicSalary")
-      ? Number(formData.get("basicSalary"))
-      : null,
-    allowances: formData.get("allowances")
-      ? Number(formData.get("allowances"))
-      : null,
-    totalSalary: formData.get("totalSalary")
-      ? Number(formData.get("totalSalary"))
-      : null,
-
-    status: formData.get("status")?.toString() || null,
-  };
-
-  // User fields
-  const userUpdate = {
-    name: formData.get("userName")?.toString(),
-    email: formData.get("userEmail")?.toString(),
-  };
-
-  // Remove empty values for user
-  Object.keys(userUpdate).forEach((key) => {
-    if (!userUpdate[key as keyof typeof userUpdate]) {
-      delete userUpdate[key as keyof typeof userUpdate];
+    if (!session || session.user.role !== "ADMIN") {
+      throw new Error("Unauthorized");
     }
-  });
 
-  const updated = await prisma.employee.update({
-    where: { id: employeeId },
-    data: {
-      ...data,
-      user: Object.keys(userUpdate).length
-        ? { update: userUpdate }
-        : undefined,
-    },
-    include: { user: true },
-  });
+    const employeeId = formData.get("employeeId")?.toString();
+    if (!employeeId) throw new Error("Employee ID missing");
 
-  return { success: true, employee: updated };
-} catch (err) {
-  return { error: "Failed to update employee" };
+    // Field groups
+    const dateFields = ["dateOfBirth", "iqamaExpiry", "passportExpiry", "joinDate","insuranceIssueDate","insuranceExpiryDate"];
+    const numberFields = ["basicSalary", "housingAllowance", "transportationAllowance", "foodAllowance", "mobileAllowance", "otherAllowance"];
+
+    const employeeFields = [
+      "empId",
+      "phone",
+      "gender",
+      "nationality",
+      "maritalStatus",
+      "address",
+      "emergencyName",
+      "emergencyPhone",
+      "emergencyRelation",
+      "iqamaNo",
+      "passportNo",
+      "jobTitle",
+      "employmentType",
+      "contractValidity",
+      "probationPeriod",
+      "workingHours",
+      "workingDays",
+      "workLocation",
+      "insuranceName",
+      "insuranceCategory",
+      "bankName",
+      "bankAccount",
+      "bankIBAN",
+      "status",
+      ...dateFields,
+      ...numberFields,
+    ];
+
+    const data: any = {};
+
+    // Build employee payload ONLY from submitted fields
+    for (const key of employeeFields) {
+      const raw = formData.get(key);
+
+      // Do NOT overwrite existing values unless the field was submitted
+      if (raw === null || raw === "") continue;
+
+      // Date fields
+      if (dateFields.includes(key)) {
+        data[key] = new Date(raw.toString());
+        continue;
+      }
+
+      // Number fields
+      if (numberFields.includes(key)) {
+        data[key] = Number(raw);
+        continue;
+      }
+
+      // Normal string fields
+      data[key] = raw.toString();
+    }
+
+    // -----------------------------
+    // USER UPDATE (name + email)
+    // -----------------------------
+    const userUpdate: any = {};
+
+    const rawName = formData.get("name");
+    const rawEmail = formData.get("email");
+
+    if (rawName && rawName.toString().trim() !== "") {
+      userUpdate.name = rawName.toString();
+    }
+
+    if (rawEmail && rawEmail.toString().trim() !== "") {
+      userUpdate.email = rawEmail.toString();
+    }
+
+    // -----------------------------
+    // Execute update
+    // -----------------------------
+    const updated = await prisma.employee.update({
+      where: { id: employeeId },
+      data: {
+        ...data,
+        user: Object.keys(userUpdate).length ? { update: userUpdate } : undefined,
+      },
+      include: { user: true },
+    });
+
+    return { success: true, employee: updated };
+  } catch (err) {
+    console.error("updateEmployeeAction error:", err);
+    return { error: "Failed to update employee" };
+  }
 }
-}
+
 
 
 export async function deleteEmployeeAction(id: string) {

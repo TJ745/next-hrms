@@ -23,7 +23,10 @@ type GeneralFormProps = {
 };
 
 function GeneralFrom({ employee }: GeneralFormProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [isEditingID, setIsEditingID] = useState(false);
+  const [isEditingEmergency, setIsEditingEmergency] = useState(false);
+
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
@@ -42,6 +45,10 @@ function GeneralFrom({ employee }: GeneralFormProps) {
       toast.success("Employee updated successfully.");
       router.refresh();
       setIsPending(false);
+
+      setIsEditingPersonal(false);
+      setIsEditingID(false);
+      setIsEditingEmergency(false);
     }
   }
 
@@ -51,12 +58,12 @@ function GeneralFrom({ employee }: GeneralFormProps) {
         <form onSubmit={handleSubmit}>
           <CardHeader className="flex items-center justify-between h-2">
             <CardTitle>Personal Info</CardTitle>
-            {isEditing ? (
+            {isEditingPersonal ? (
               <div className="flex gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsEditing(false)}
+                  onClick={() => setIsEditingPersonal(false)}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -73,7 +80,7 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               <Button
                 variant="link"
                 size="icon"
-                onClick={() => setIsEditing(true)}
+                onClick={() => setIsEditingPersonal(true)}
               >
                 <Pencil className="h-4 w-4" />
               </Button>
@@ -86,27 +93,14 @@ function GeneralFrom({ employee }: GeneralFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-8 mt-2">
               <Input type="hidden" name="employeeId" value={employee.id} />
               <div className="flex items-center ">
-                <Label className="w-[140px] text-muted-foreground">Employee ID</Label>
-                {isEditing ? (
-                  <Input
-                    name="empId"
-                    defaultValue={employee.empId || ""}
-                    disabled={!isEditing}
-                  />
-                ) : (
-                  <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.empId || "-"}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center ">
-                <Label className="w-[140px] text-muted-foreground">Full Name</Label>
-                {isEditing ? (
+                <Label className="w-[140px] text-muted-foreground">
+                  Full Name
+                </Label>
+                {isEditingPersonal ? (
                   <Input
                     name="name"
                     defaultValue={employee.user.name || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -117,11 +111,11 @@ function GeneralFrom({ employee }: GeneralFormProps) {
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">Phone</Label>
-                {isEditing ? (
+                {isEditingPersonal ? (
                   <Input
                     name="phone"
                     defaultValue={employee.phone || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -130,14 +124,13 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                 )}
               </div>
 
-              
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">Email</Label>
-                {isEditing ? (
+                {isEditingPersonal ? (
                   <Input
                     name="email"
                     defaultValue={employee.user.email || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -147,12 +140,14 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               </div>
 
               <div className="flex items-center ">
-                <Label className="w-[140px] text-muted-foreground">Gender</Label>
-                {isEditing ? (
+                <Label className="w-[140px] text-muted-foreground">
+                  Gender
+                </Label>
+                {isEditingPersonal ? (
                   <Input
                     name="gender"
                     defaultValue={employee.gender || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -162,32 +157,34 @@ function GeneralFrom({ employee }: GeneralFormProps) {
               </div>
 
               <div className="flex items-center ">
-                              <Label className="w-[140px] text-muted-foreground">
-                                Date of Birth
-                              </Label>
-                              {isEditing ? (
-                              <Input
-                                type="date"
-                                name="dateOfBirth"
-                                defaultValue={employee.dateOfBirth?.toISOString().split("T")[0]}
-                                disabled={!isEditing}
-                              />) : (
+                <Label className="w-[140px] text-muted-foreground">
+                  Date of Birth
+                </Label>
+                {isEditingPersonal ? (
+                  <Input
+                    type="date"
+                    name="dateOfBirth"
+                    defaultValue={
+                      employee.dateOfBirth?.toISOString().split("T")[0]
+                    }
+                    disabled={!isEditingPersonal}
+                  />
+                ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
                     {employee.dateOfBirth?.toISOString().split("T")[0] || "-"}
                   </span>
                 )}
               </div>
 
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Nationality
                 </Label>
-                {isEditing ? (
+                {isEditingPersonal ? (
                   <Input
                     name="nationality"
                     defaultValue={employee.nationality || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -200,11 +197,11 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                 <Label className="w-[140px] text-muted-foreground">
                   Marital Status
                 </Label>
-                {isEditing ? (
+                {isEditingPersonal ? (
                   <Input
                     name="maritalStatus"
                     defaultValue={employee.maritalStatus || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -217,11 +214,11 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                 <Label className="w-[140px] text-muted-foreground">
                   Address
                 </Label>
-                {isEditing ? (
+                {isEditingPersonal ? (
                   <Input
                     name="address"
                     defaultValue={employee.address || ""}
-                    disabled={!isEditing}
+                    disabled={!isEditingPersonal}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
@@ -230,103 +227,102 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                 )}
               </div>
 
+              
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
-                  Medical Insurance
+                  Status
                 </Label>
-                {isEditing ? (
-                  <Input
-                    name="address"
-                    defaultValue={employee.address || ""}
-                    disabled={!isEditing}
-                  />
+
+                {isEditingPersonal ? (
+                  <Select name="status" defaultValue={employee.status || ""}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Terminated">Terminated</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.address || "-"}
+                    {employee.status || "-"}
                   </span>
                 )}
               </div>
-
-              <Label className="w-[140px] text-muted-foreground">Status</Label>
-
-              <Select name="status">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Terminated">Terminated</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
         </form>
       </Card>
+
       <Card className="mt-4">
-        <CardHeader className="flex items-center justify-between h-2">
-          <CardTitle>Address</CardTitle>
-          {isEditing ? (
-            <div className="flex gap-2">
+        <form onSubmit={handleSubmit}>
+          <CardHeader className="flex items-center justify-between h-2">
+            <CardTitle>Identification Info</CardTitle>
+            {isEditingID ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditingID(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="icon"
+                  type="submit"
+                  disabled={isPending}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
               <Button
-                variant="ghost"
+                variant="link"
                 size="icon"
-                onClick={() => setIsEditing(false)}
+                onClick={() => setIsEditingID(true)}
               >
-                <X className="h-4 w-4" />
+                <Pencil className="h-4 w-4" />
               </Button>
-              <Button
-                variant="default"
-                size="icon"
-                // onClick={handleSave}
-                disabled={isPending}
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="link"
-              size="icon"
-              // onClick={() => setIsEditing(true)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          )}
-        </CardHeader>
-        <hr />
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-          <div className="flex items-center ">
+            )}
+          </CardHeader>
+          <br />
+          <hr />
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-8 mt-2">
+              <Input type="hidden" name="employeeId" value={employee.id} />
+              <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Iqama Number
                 </Label>
-                {isEditing ? (
-              <Input
-                name="iqamaNo"
-                defaultValue={employee.iqamaNo || ""}
-                disabled={!isEditing}
-              />
-            ) : (
-              <span className="text-sm text-right text-foreground font-medium truncate">
-                {employee.iqamaNo || "-"}
-              </span>
-            )}
+                {isEditingID ? (
+                  <Input
+                    name="iqamaNo"
+                    defaultValue={employee.iqamaNo || ""}
+                    disabled={!isEditingID}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.iqamaNo || "-"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Iqama Expiry
                 </Label>
-                {isEditing ? (
+                {isEditingID ? (
                   <Input
-                      name="iqamaExpiry"
-                      type="date"
-                      defaultValue={
-                        employee.iqamaExpiry?.toISOString().split("T")[0]
-                      }
-                      disabled={!isEditing}
-                    />
+                    name="iqamaExpiry"
+                    type="date"
+                    defaultValue={
+                      employee.iqamaExpiry?.toISOString().split("T")[0]
+                    }
+                    disabled={!isEditingID}
+                  />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
                     {employee.iqamaExpiry?.toISOString().split("T")[0] || "-"}
@@ -338,121 +334,134 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                 <Label className="w-[140px] text-muted-foreground">
                   Passport Number
                 </Label>
-                {isEditing ? (
-              <Input
-                name="passportNo"
-                defaultValue={employee.passportNo || ""}
-                disabled={!isEditing}
-              />
-            ) : (
-              <span className="text-sm text-right text-foreground font-medium truncate">
-                {employee.passportNo || "-"}
-              </span>
-            )}
+                {isEditingID ? (
+                  <Input
+                    name="passportNo"
+                    defaultValue={employee.passportNo || ""}
+                    disabled={!isEditingID}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.passportNo || "-"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Passport Expiry
                 </Label>
-                {isEditing ? (
+                {isEditingID ? (
                   <Input
-                      name="passportExpiry"
-                      type="date"
-                      defaultValue={
-                        employee.passportExpiry?.toISOString().split("T")[0]
-                      }
-                      disabled={!isEditing}
-                    />
+                    name="passportExpiry"
+                    type="date"
+                    defaultValue={
+                      employee.passportExpiry?.toISOString().split("T")[0]
+                    }
+                    disabled={!isEditingID}
+                  />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.passportExpiry?.toISOString().split("T")[0] || "-"}
+                    {employee.passportExpiry?.toISOString().split("T")[0] ||
+                      "-"}
                   </span>
                 )}
               </div>
-        </CardContent>
+            </div>
+          </CardContent>
+        </form>
       </Card>
 
       <Card className="mt-4">
-        <CardHeader className="flex items-center justify-between h-2">
-          <CardTitle>Emergency Contact</CardTitle>
-          {isEditing ? (
-            <div className="flex gap-2">
+        <form onSubmit={handleSubmit}>
+          <CardHeader className="flex items-center justify-between h-2">
+            <CardTitle>Emergency Contact</CardTitle>
+            {isEditingEmergency ? (
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsEditingEmergency(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="icon"
+                  type="submit"
+                  disabled={isPending}
+                >
+                  <Save className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
               <Button
-                variant="ghost"
+                variant="link"
                 size="icon"
-                onClick={() => setIsEditing(false)}
+                onClick={() => setIsEditingEmergency(true)}
               >
-                <X className="h-4 w-4" />
+                <Pencil className="h-4 w-4" />
               </Button>
-              <Button
-                variant="default"
-                size="icon"
-                // onClick={handleSave}
-                disabled={isPending}
-              >
-                <Save className="h-4 w-4" />
-              </Button>
+            )}
+          </CardHeader>
+          <br />
+          <hr />
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-x-8 mt-2">
+              <Input type="hidden" name="employeeId" value={employee.id} />
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Full Name
+                </Label>
+                {isEditingEmergency ? (
+                  <Input
+                    name="emergencyName"
+                    defaultValue={employee.emergencyName || ""}
+                    disabled={!isEditingEmergency}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.emergencyName || "-"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Phone Number
+                </Label>
+                {isEditingEmergency ? (
+                  <Input
+                    name="emergencyPhone"
+                    defaultValue={employee.emergencyPhone || ""}
+                    disabled={!isEditingEmergency}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.emergencyPhone || "-"}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center ">
+                <Label className="w-[140px] text-muted-foreground">
+                  Relation
+                </Label>
+                {isEditingEmergency ? (
+                  <Input
+                    name="emergencyRelation"
+                    defaultValue={employee.emergencyRelation || ""}
+                    disabled={!isEditingEmergency}
+                  />
+                ) : (
+                  <span className="text-sm text-right text-foreground font-medium truncate">
+                    {employee.emergencyRelation || "-"}
+                  </span>
+                )}
+              </div>
             </div>
-          ) : (
-            <Button
-              variant="link"
-              size="icon"
-              // onClick={() => setIsEditing(true)}
-            >
-              <Pencil className="h-4 w-4" />
-            </Button>
-          )}
-        </CardHeader>
-        <hr />
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">Full Name</Label>
-            {isEditing ? (
-              <Input
-                name="emergencyName"
-                defaultValue={employee.emergencyName || ""}
-                disabled={!isEditing}
-              />
-            ) : (
-              <span className="text-sm text-right text-foreground font-medium truncate">
-                {employee.emergencyName || "-"}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">
-              Phone Number
-            </Label>
-            {isEditing ? (
-              <Input
-                name="emergencyPhone"
-                defaultValue={employee.emergencyPhone || ""}
-                disabled={!isEditing}
-              />
-            ) : (
-              <span className="text-sm text-right text-foreground font-medium truncate">
-                {employee.emergencyPhone || "-"}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center ">
-            <Label className="w-[140px] text-muted-foreground">Relation</Label>
-            {isEditing ? (
-              <Input
-                name="emergencyRelation"
-                defaultValue={employee.emergencyRelation || ""}
-                disabled={!isEditing}
-              />
-            ) : (
-              <span className="text-sm text-right text-foreground font-medium truncate">
-                {employee.emergencyRelation || "-"}
-              </span>
-            )}
-          </div>
-        </CardContent>
+          </CardContent>
+        </form>
       </Card>
     </div>
   );
