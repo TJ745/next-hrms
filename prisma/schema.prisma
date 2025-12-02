@@ -206,6 +206,11 @@ model Employee {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  orgNodes OrgNode[]
+
+  attendances Attendance[]
+  shifts      Shift[]      @relation("ShiftEmployees")
+
   @@map("employees")
 }
 
@@ -220,12 +225,16 @@ model InviteToken {
 }
 
 model OrgNode {
-  id         String    @id @default(uuid())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
   employeeId String? // optional: empty node when no employee assigned yet
-  parentId   String? // self relation
-  parent     OrgNode?  @relation("OrgNodeHierarchy", fields: [parentId], references: [id])
-  children   OrgNode[] @relation("OrgNodeHierarchy")
-  createdAt  DateTime  @default(now())
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+
+  parentId String? // self relation
+  parent   OrgNode? @relation("OrgNodeHierarchy", fields: [parentId], references: [id])
+
+  children OrgNode[] @relation("OrgNodeHierarchy")
 
   @@map("org_nodes")
 }
@@ -242,4 +251,51 @@ model JobTitle {
   createdBy   User   @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@map("jobtitles")
+}
+
+model Shift {
+  id   String @id @default(uuid())
+  name String
+
+  startTime DateTime
+  endTime   DateTime
+
+  employees   Employee[]   @relation("ShiftEmployees")
+  attendances Attendance[]
+
+  @@map("shifts")
+}
+
+model Attendance {
+  id String @id @default(uuid())
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId String
+
+  date     DateTime
+  clockIn  DateTime?
+  clockOut DateTime?
+
+  status AttendanceStatus @default(PRESENT)
+
+  shift   Shift?  @relation(fields: [shiftId], references: [id])
+  shiftId String?
+
+  overtime Float? // hours
+
+  earlyLeave Float? // hours
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("attendances")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  ON_LEAVE
 }

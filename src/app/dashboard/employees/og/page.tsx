@@ -8,15 +8,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Save, SlashIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import OrgChartClient from "./OrgChartClient";
-import { getAllEmployees, getOrgTree } from "@/actions/org-chart.actions";
+import { getOrgTree } from "@/lib/getOrgTree";
+import OrgChartTree from "./OrgChartTree";
 
 export const dynamic = "force-dynamic"; // ensures fresh data
 
-
-
 async function page() {
-  const [employees, tree] = await Promise.all([getAllEmployees(), getOrgTree()]);
+  const data = await getOrgTree();
 
   return (
     <main className="w-full">
@@ -41,11 +39,13 @@ async function page() {
           <div className="flex justify-between items-center">
             <h1 className="text-xl font-bold">Organization Chart</h1>
             <div className="flex space-x-2">
-                          <Button variant={"outline"}><Save/> Print</Button>
-                        </div>
+              <Button variant={"outline"}>
+                <Save /> Print
+              </Button>
+            </div>
           </div>
           <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4 mt-4">
-            <OrgChartClient employees={employees} initialTree={tree} />
+            <OrgChartTree nodes={data} />
           </div>
         </div>
       </div>

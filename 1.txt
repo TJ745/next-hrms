@@ -1,12 +1,115 @@
-8eadb5bb-9dd6-49f8-9ee9-b0872f944d6f
-8eadb5bb-9dd6-49f8-9ee9-b0872f944d6f
+1. Core HR / Employee Information Management
 
-dcf62533-796f-4fa9-aecc-d0226d7a3d0d
-dcf62533-796f-4fa9-aecc-d0226d7a3d0d
-dcf62533-796f-4fa9-aecc-d0226d7a3d0d
+Employee profiles
 
+Job details
 
-6c8f787d-6bae-4dbd-a803-7620534e1959
+Contracts
 
+Documents
 
-6c8f787d-6bae-4dbd-a803-7620534e1959
+Work history
+
+2. Recruitment & Onboarding (ATS)
+
+Job posting
+
+Applicant tracking
+
+Interview scheduling
+
+New employee onboarding
+
+3. Attendance & Time Management
+
+Clock-in/out
+
+Timesheets
+
+Overtime tracking
+
+Shift management
+
+Delay/early leave logs
+
+4. Leave & Absence Management
+
+Annual leave
+
+Sick leave
+
+Emergency leave
+
+Manager approvals
+
+Leave balances
+
+5. Payroll Management (KSA-Compliant)
+
+Salary calculation
+
+Allowances
+
+Deductions
+
+Overtime
+
+GOSI (Saudi Social Insurance)
+
+End-of-service calculation (EOSB)
+
+Payslip generation
+
+6. Performance Management
+
+Goals & KPIs
+
+Appraisal cycles
+
+360° evaluation
+
+Promotion recommendations
+
+7. Training & Learning Management
+
+Courses
+
+Skills tracking
+
+Employee development plans
+
+8. Employee Self-Service (ESS) / Manager Self-Service (MSS)
+
+Employees request leave
+
+Download payslips
+
+Update personal info
+
+Expense claims
+
+9. Organization Structure & Workflow
+
+Department hierarchy
+
+Approval workflows
+
+Role permissions
+
+10. HR Analytics & Reporting
+
+Attendance reports
+
+Payroll summaries
+
+Turnover rate
+
+Performance insights
+
+11. Travel & Expense Management (optional in some systems)
+
+Business trip requests
+
+Travel approvals
+
+Expense reimbursement
