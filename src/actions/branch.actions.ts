@@ -44,6 +44,9 @@ export async function createBranchAction(formData: FormData) {
 export async function getBranchesAction() {
   const headerList = await headers();
   const session = await auth.api.getSession({ headers: headerList });
+  if (!session?.user.companyId) {
+    return [];
+  }
   return prisma.branch.findMany({
     where: { companyId: session?.user.companyId  },
     include:{

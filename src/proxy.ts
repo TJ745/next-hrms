@@ -9,7 +9,7 @@ const allowedAuthWhenLoggedIn = [
   "/auth/reset-password",
 ];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { nextUrl } = req;
   const sessionCookie = getSessionCookie(req);
 
@@ -41,7 +41,7 @@ export async function middleware(req: NextRequest) {
 
   // Logged in but navigating to auth routes BUT allow password setup routes
   if (isLoggedIn && isAuthRoute && !isAllowedAuthRoute) {
-    return NextResponse.redirect(new URL("/profile", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   return res;

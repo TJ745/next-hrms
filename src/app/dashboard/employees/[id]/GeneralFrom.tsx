@@ -227,7 +227,6 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                 )}
               </div>
 
-              
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Status
@@ -240,8 +239,8 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Terminated">Terminated</SelectItem>
+                        <SelectItem value="ACTIVE">Active</SelectItem>
+                        <SelectItem value="INACTIVE">Inactive</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>

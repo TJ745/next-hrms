@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { clockIn, clockOut } from "@/actions/attendance.actions";
+import { checkInAction, checkOutAction } from "@/actions/attendance.actions";
 
 export default function ClockButtons() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function ClockButtons() {
   async function handleClockIn() {
     setLoading(true);
     try {
-      await clockIn(employeeId);
+      await checkInAction(employeeId);
       router.refresh();
     } catch (err: any) {
       alert(err.message);
@@ -25,7 +25,7 @@ export default function ClockButtons() {
   async function handleClockOut() {
     setLoading(true);
     try {
-      await clockOut(attendanceId);
+      await checkOutAction(attendanceId);
       router.refresh();
     } catch (err: any) {
       alert(err.message);

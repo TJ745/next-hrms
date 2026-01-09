@@ -1,6 +1,6 @@
 "use client";
 
-import { UserRole } from "@/generated/prisma";
+import { UserRole } from "@/types/enums";
 import { admin } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -57,7 +57,8 @@ export const UserRoleSelect = ({ userId, role }: UserRoleSelectProps) => {
       className="px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
     >
       <option value="ADMIN">Admin</option>
-      <option value="USER">User</option>
+      <option value="HR">HR</option>
+      <option value="EMPLOYEE">Employee</option>
     </select>
   );
 };

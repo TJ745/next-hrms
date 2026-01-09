@@ -5,8 +5,8 @@ import { hashPassword, verifyPassword } from "./argon2";
 import { nextCookies } from "better-auth/next-js";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import { getValidDomains, normalizeName } from "./utils";
-import { UserRole } from "@/generated/prisma";
-import { admin, customSession, magicLink } from "better-auth/plugins";
+import { UserRole } from "@/types/enums";
+import { admin, customSession } from "better-auth/plugins";
 import { ac, roles } from "@/lib/permissions";
 import { sendEmailAction } from "@/actions/send-email.action";
 
@@ -14,12 +14,7 @@ const options = {
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  socialProviders: {
-    github: {
-      clientId: String(process.env.GITHUB_CLIENT_ID),
-      clientSecret: String(process.env.GITHUB_CLIENT_SECRET),
-    },
-  },
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
@@ -61,7 +56,7 @@ const options = {
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === "/sign-up/email") {
-        const email = String(ctx.body.email);
+        const email = String(ctx.body.email).toLowerCase();
         const domain = email.split("@")[1];
         const VALID_DOMAINS = getValidDomains();
         if (!VALID_DOMAINS.includes(domain)) {
@@ -81,17 +76,6 @@ const options = {
         };
       }
 
-      if (ctx.path === "/sign-in/magic-link") {
-        return {
-          context: {
-            ...ctx,
-            body: {
-              ...ctx.body,
-              name: normalizeName(ctx.body.name),
-            },
-          },
-        };
-      }
       if (ctx.path === "/update-user") {
         return {
           context: {
@@ -122,13 +106,13 @@ const options = {
   user: {
     additionalFields: {
       role: {
-        type: ["ADMIN" , "MANAGER" , "EMPLOYEE"] as Array<UserRole>,
+        type: ["ADMIN", "HR", "EMPLOYEE"] as Array<UserRole>,
         input: false,
       },
       companyId: {
-    type: "string",
-    input: false,
-  },
+        type: "string",
+        input: false,
+      },
     },
   },
   session: {
@@ -156,18 +140,6 @@ const options = {
       ac,
       roles,
     }),
-    magicLink({
-      sendMagicLink: async ({ email, url }) => {
-        await sendEmailAction({
-          to: email,
-          subject: "Magic Link Login",
-          meta: {
-            description: "Please click the link below to Login.",
-            link: url,
-          },
-        });
-      },
-    }),
   ],
 } satisfies BetterAuthOptions;
 
@@ -178,6 +150,7 @@ export const auth = betterAuth({
     customSession(async ({ user, session }) => {
       return {
         session: {
+          strategy: "jwt",
           expiresAt: session.expiresAt,
           token: session.token,
           userAgent: session.userAgent,

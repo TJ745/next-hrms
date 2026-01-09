@@ -12,19 +12,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Employee, User } from "@/generated/prisma";
+import {
+  Branch,
+  Company,
+  Department,
+  Employee,
+  User,
+} from "@/generated/prisma";
 import { Pencil, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
 type GeneralFormProps = {
-  employee: Employee & { user: User };
+  employee: Employee & {
+    user: User & {
+      department: Department | null;
+      branch: Branch | null;
+      company: Company | null;
+    };
+  };
 };
 
 function JobForm({ employee }: GeneralFormProps) {
   const [isEditing, setIsEditing] = useState(false);
-
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
@@ -48,38 +59,89 @@ function JobForm({ employee }: GeneralFormProps) {
     }
   }
 
-  const contractStartDate = employee.joinDate;
+  // const contractStartDate = employee.joinDate;
 
-  const end = new Date(employee.joinDate || "");
-  end.setFullYear(end.getFullYear() + Number(employee.contractValidity));
-  const contractEndDate = end.toISOString().split("T")[0];
+  // const end = new Date(employee.joinDate || "");
+  // end.setFullYear(end.getFullYear() + Number(employee.contractValidity));
+  // const contractEndDate = end.toISOString().split("T")[0];
 
-  const probEnd = new Date(employee.joinDate || "");
-  probEnd.setMonth(probEnd.getMonth() + Number(employee.probationPeriod));
-  const probationEndDate = probEnd.toISOString().split("T")[0];
+  // const probEnd = new Date(employee.joinDate || "");
+  // probEnd.setMonth(probEnd.getMonth() + Number(employee.probationPeriod));
+  // const probationEndDate = probEnd.toISOString().split("T")[0];
 
-  const joinDate = new Date(employee.joinDate || "");
-  const today = new Date();
+  // const joinDate = new Date(employee.joinDate || "");
+  // const today = new Date();
 
-  let years = today.getFullYear() - joinDate.getFullYear();
-  let months = today.getMonth() - joinDate.getMonth();
-  let days = today.getDate() - joinDate.getDate();
+  // let years = today.getFullYear() - joinDate.getFullYear();
+  // let months = today.getMonth() - joinDate.getMonth();
+  // let days = today.getDate() - joinDate.getDate();
 
-  // Adjust days
-  if (days < 0) {
-    months--;
-    const prevMonth = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      0
-    ).getDate();
-    days += prevMonth;
+  // // Adjust days
+  // if (days < 0) {
+  //   months--;
+  //   const prevMonth = new Date(
+  //     today.getFullYear(),
+  //     today.getMonth(),
+  //     0
+  //   ).getDate();
+  //   days += prevMonth;
+  // }
+
+  // // Adjust months
+  // if (months < 0) {
+  //   years--;
+  //   months += 12;
+  // }
+
+  function formatDate(date?: Date | null) {
+    if (!date) return "-";
+    return date.toISOString().split("T")[0];
   }
 
-  // Adjust months
-  if (months < 0) {
-    years--;
-    months += 12;
+  const joinDate = employee.joinDate ? new Date(employee.joinDate) : null;
+
+  const contractStartDate = joinDate;
+
+  const contractEndDate =
+    joinDate && employee.contractValidity
+      ? (() => {
+          const end = new Date(joinDate);
+          end.setFullYear(
+            end.getFullYear() + Number(employee.contractValidity)
+          );
+          return end.toISOString().split("T")[0];
+        })()
+      : "-";
+
+  const probationEndDate =
+    joinDate && employee.probationPeriod
+      ? (() => {
+          const end = new Date(joinDate);
+          end.setMonth(end.getMonth() + Number(employee.probationPeriod));
+          return end.toISOString().split("T")[0];
+        })()
+      : "-";
+
+  let serviceDuration = "-";
+
+  if (joinDate) {
+    const today = new Date();
+
+    let years = today.getFullYear() - joinDate.getFullYear();
+    let months = today.getMonth() - joinDate.getMonth();
+    let days = today.getDate() - joinDate.getDate();
+
+    if (days < 0) {
+      months--;
+      days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    serviceDuration = `${years} Years ${months} Months ${days} Days`;
   }
 
   return (
@@ -87,7 +149,7 @@ function JobForm({ employee }: GeneralFormProps) {
       <Card className="mt-4">
         <form onSubmit={handleSubmit}>
           <CardHeader className="flex items-center justify-between h-2">
-            <CardTitle>Employement Info</CardTitle>
+            <CardTitle>Employment Info</CardTitle>
             {isEditing ? (
               <div className="flex gap-2">
                 <Button
@@ -170,7 +232,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Department
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {employee.user.name}
+                  {employee.user.department?.name}
                 </span>
               </div>
 
@@ -179,7 +241,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Branch
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {employee.user.name}
+                  {employee.user.branch?.name}
                 </span>
               </div>
 
@@ -193,7 +255,7 @@ function JobForm({ employee }: GeneralFormProps) {
                     defaultValue={employee.employmentType || ""}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Employement Type" />
+                      <SelectValue placeholder="Select Employment Type" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -217,14 +279,12 @@ function JobForm({ employee }: GeneralFormProps) {
                   <Input
                     name="joinDate"
                     type="date"
-                    defaultValue={
-                      employee.joinDate?.toISOString().split("T")[0]
-                    }
+                    defaultValue={formatDate(contractStartDate)}
                     disabled={!isEditing}
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.joinDate?.toISOString().split("T")[0] || "-"}
+                    {formatDate(contractStartDate)}
                   </span>
                 )}
               </div>
@@ -260,7 +320,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Contract Start Date
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {contractStartDate?.toISOString().split("T")[0] || "-"}
+                  {formatDate(contractStartDate)}
                 </span>
               </div>
 
@@ -313,7 +373,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Service Year
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {`${years} Years ${months} Months ${days} Days`}
+                  {serviceDuration}
                 </span>
               </div>
 

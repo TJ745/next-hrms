@@ -1,5 +1,5 @@
 "use client";
-import { createShift } from "@/actions/attendance.actions";
+// import { createShift } from "@/actions/attendance.actions";
 import { useState } from "react";
 
 export default function ShiftForm() {
@@ -9,7 +9,7 @@ export default function ShiftForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await createShift(name, new Date(start), new Date(end));
+    // await createShift(name, new Date(start), new Date(end));
     alert("Shift created!");
   }
 

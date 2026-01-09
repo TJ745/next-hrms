@@ -19,6 +19,9 @@ export async function deleteUserAction({ userId }: { userId: string }) {
     throw new Error("Forbidden");
   }
 
+  const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+  if (!existingUser) return { error: "User not found" };
+
   try {
     await prisma.user.delete({
       where: { id: userId },
@@ -30,8 +33,8 @@ export async function deleteUserAction({ userId }: { userId: string }) {
       });
       redirect("/auth/login");
     }
-    revalidatePath("/dashboard");
-    return { error: null };
+    revalidatePath("/dashboard/employees/list");
+    return { success: true, error: null };
   } catch (err) {
     if (isRedirectError(err)) {
       throw err;

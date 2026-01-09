@@ -1,19 +1,38 @@
 import { Prisma } from "@prisma/client";
 
-// Employee + User
-// export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
-//   include: {
-//     user: true;
-//   };
-// }>;
-
-// Employee + User + Department
 export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
   include: {
-    user: {
+    user: true;
+    department: {
       include: {
-        department: true;
+        branch: {
+          include: {
+            company: true;
+          };
+        };
       };
     };
+    manager: {
+      select: {
+        id: true;
+        user: {
+          select: {
+            name: true;
+            email: true;
+            role: true;
+          };
+        };
+      };
+    };
+    shift: true;
+    assets: true;
+    attendance: true;
+    documents: true;
+    leaveBalance: true;
+    leaves: true;
+    overtimes: true;
+    payrolls: true;
+    salaryHistory: true;
+    team: true;
   };
 }>;

@@ -63,11 +63,11 @@ export const sidebarMenuItems = (role: Role): SidebarProps[] => [
     children: [
       {
         title: "My Attendance",
-        url: "/",
+        url: "/dashboard/attendance/myattendance",
       },
       {
         title: "Team Attendance",
-        url: "/",
+        url: "/dashboard/attendance/adminattendance",
       },
       {
         title: "Employee Attendance",

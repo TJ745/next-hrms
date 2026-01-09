@@ -33,9 +33,7 @@ function RegisterForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
-          Full Name
-        </Label>
+        <Label className="block text-sm font-medium ">Full Name</Label>
         <Input
           type="text"
           name="name"
@@ -46,9 +44,7 @@ function RegisterForm() {
 
       {/* Email */}
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
-          Email Address
-        </Label>
+        <Label className="block text-sm font-medium ">Email Address</Label>
         <Input
           type="email"
           name="email"
@@ -59,9 +55,7 @@ function RegisterForm() {
 
       {/* Password */}
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
-          Password
-        </Label>
+        <Label className="block text-sm font-medium ">Password</Label>
         <div className="relative mt-1">
           <Input
             // type={showPass ? "text" : "password"}

@@ -6,11 +6,11 @@ export default async function AttendancePage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const attendances = await prisma.attendance.findMany({
-    where: { date: today },
-    include: { employee: { include: { user: true } }, shift: true },
-    orderBy: { createdAt: "desc" },
-  });
+  // const attendances = await prisma.attendance.findMany({
+  //   where: { date: today },
+  //   include: { employee: { include: { user: true } }, shift: true },
+  //   orderBy: { createdAt: "desc" },
+  // });
 
   return (
     <div className="container mx-auto p-6">
@@ -19,7 +19,7 @@ export default async function AttendancePage() {
       <ClockButtons />
 
       <div className="mt-6 grid gap-4">
-        {attendances.map((a) => (
+        {/* {attendances.map((a) => (
           <div
             key={a.id}
             className="p-4 rounded-lg border bg-white shadow flex justify-between"
@@ -35,7 +35,7 @@ export default async function AttendancePage() {
               </div>
             </div>
           </div>
-        ))}
+        ))} */}
       </div>
     </div>
   );

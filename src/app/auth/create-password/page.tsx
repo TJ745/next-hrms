@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { setPasswordAction } from "@/actions/set-password.actions";
 
-export default async function CreatePasswordPage({ searchParams }: any) {
-  const token = searchParams.token;
+export default async function CreatePasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
+  const { token } = await searchParams;
 
   if (!token) {
     return <p className="text-red-500">Invalid or missing token.</p>;

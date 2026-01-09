@@ -1,0 +1,268 @@
+PHASE 1: Project Setup & Core Infrastructure
+
+Initialize Next.js 16 project
+
+npx create-next-app@latest hrms --ts
+cd hrms
+
+
+Install core dependencies
+
+npm install tailwindcss shadcn-ui prisma @prisma/client better-auth react-query zod pusher-js
+
+
+Setup Tailwind & Shadcn
+
+npx tailwindcss init -p
+# Configure shadcn
+npx shadcn-ui init
+
+
+Setup Prisma + Neon
+
+Add DATABASE_URL in .env
+
+Add full schema (from final schema) to prisma/schema.prisma
+
+Run migration:
+
+npx prisma migrate dev --name init_hrms
+npx prisma generate
+
+
+Setup BetterAuth
+
+Configure with User table
+
+Roles: ADMIN, HR, EMPLOYEE
+
+Add role-based middleware for route protection
+
+PHASE 2: Seed Data & Basic Models
+
+Seed Roles in BetterAuth (ADMIN, HR, EMPLOYEE)
+
+Seed Companies → Branches → Departments
+
+Seed Leave Types, Shifts, Weekend Rules
+
+Test DB relations:
+
+Create an employee + link to user + department + shift
+
+PHASE 3: Employee Module
+
+CRUD Employee (Admin/HR)
+
+Assign:
+
+Department
+
+Shift
+
+Manager
+
+SalaryHistory
+
+Documents
+
+Upload documents (file → cloud storage like S3 / Vercel Blob)
+
+Show employee profile (include documents, salary history, manager, team)
+
+PHASE 4: Attendance & Geo-Fencing
+
+Employee check-in/out:
+
+Capture lat/lng
+
+Validate against branch GeoFence
+
+Apply shift start/end + grace minutes
+
+Apply weekend & holiday rules
+
+Attendance dashboard:
+
+Stats per employee, branch, department
+
+PHASE 5: Leave Management
+
+Leave balances per type/year
+
+Leave request creation
+
+Multi-level approval workflow:
+
+Manager → HR → Admin
+
+Notifications triggered at each approval stage
+
+Cron job to reset leave balances yearly (optional)
+
+PHASE 6: Overtime Module
+
+Employee applies for overtime
+
+Multi-level approval workflow (Manager → HR)
+
+Overtime affects payroll calculations
+
+Notifications for approvals
+
+PHASE 7: Payroll & Salary History
+
+SalaryHistory: track salary changes over time
+
+Payroll generation:
+
+Base salary from SalaryHistory
+
+Overtime
+
+Deductions
+
+Net salary
+
+Optional: store payroll files (PDF)
+
+Notifications to employee when payroll is generated
+
+PHASE 8: Assets Module
+
+Admin/HR assign assets
+
+Track assignedAt / returnedAt
+
+Multi-level approvals for asset requests (optional)
+
+Notifications when assets assigned or returned
+
+PHASE 9: Holidays & Weekend Rules
+
+Configure global holidays & branch-specific holidays
+
+Weekend rules per branch
+
+Attendance logic:
+
+Holiday > Weekend > Working Day
+
+
+Reports should respect holidays/weekends
+
+PHASE 10: Employee Documents
+
+Upload documents with metadata & expiry
+
+Cron job to send notifications before expiry
+
+Document expiry notifications sent via:
+
+In-app
+
+Push (Pusher)
+
+Email (optional)
+
+PHASE 11: Notifications System
+
+Schema + user preferences already implemented
+
+Real-time notifications with Pusher
+
+Trigger on leave request, approval, document expiry, payroll
+
+In-app notification UI:
+
+Bell icon
+
+Dropdown / page
+
+Badge count for unread notifications
+
+Auto-clean read notifications older than 30 days
+
+PHASE 12: Reports & Dashboards
+
+Employee overview
+
+Attendance summary
+
+Leave summary & balances
+
+Payroll summary
+
+Asset allocation report
+
+Notifications history
+
+PHASE 13: Security & Roles
+
+Role-based route protection (Admin/HR/Employee)
+
+Session management via BetterAuth
+
+Validate permissions for:
+
+CRUD actions
+
+Approvals
+
+Asset assignment
+
+PHASE 14: Testing
+
+Unit tests for core modules (Prisma + APIs)
+
+Integration tests for flows:
+
+Leave request → approval → notification → payroll update
+
+Attendance with geo-fencing & shift logic
+
+Manual QA for dashboard UI
+
+PHASE 15: Deployment
+
+Vercel for Next.js frontend + server actions
+
+Prisma migrations on Neon production DB
+
+Environment variables:
+
+DATABASE_URL
+
+PUSHER keys
+
+BetterAuth secrets
+
+Setup cron jobs for:
+
+Document expiry reminders
+
+Auto-clean notifications
+
+Leave accrual resets
+
+PHASE 16: Optional Enhancements
+
+Email/SMS notifications
+
+Payslip PDF storage & download
+
+Approval escalation if manager absent
+
+Audit logs for compliance
+
+Remote employees (ignore geo-fencing)
+
+💡 Tip for Implementation
+
+Start module by module (Employee → Attendance → Leave → Overtime → Payroll → Assets → Notifications).
+
+Use server actions + Prisma transactions for multi-step processes like approvals + payroll calculations.
+
+Use React Query for client data fetching + optimistic updates.
+
+Use Shadcn components for forms, tables, modals, and dashboards.

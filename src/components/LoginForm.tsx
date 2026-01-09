@@ -35,9 +35,7 @@ function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Email */}
       <div>
-        <Label className="block text-sm font-medium text-gray-700">
-          Email Address
-        </Label>
+        <Label className="block text-sm font-medium ">Email Address</Label>
         <Input
           type="email"
           name="email"
@@ -49,9 +47,7 @@ function LoginForm() {
       {/* Password */}
       <div>
         <div className="flex justify-between items-center">
-          <Label className="block text-sm font-medium text-gray-700">
-            Password
-          </Label>
+          <Label className="block text-sm font-medium ">Password</Label>
           <Link
             href="/auth/forgot-password"
             className="text-sm text-muted-foreground hover:text-foreground"

@@ -1,41 +1,75 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendEmailAction } from "./send-email.action";
 import { randomBytes } from "crypto";
-import { Prisma } from "@/generated/prisma";
-import { EmployeeWithUser } from "@/types/prisma";
 import fs from "fs/promises";
 import path from "path";
+
+export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
+  include: {
+    user: true;
+    department: {
+      include: {
+        branch: {
+          include: {
+            company: true;
+          };
+        };
+      };
+    };
+    manager: {
+      select: {
+        id: true;
+        user: {
+          select: {
+            name: true;
+            email: true;
+            role: true;
+          };
+        };
+      };
+    };
+    shift: true;
+    assets: true;
+    attendance: true;
+    documents: true;
+    leaveBalance: true;
+    leaves: true;
+    overtimes: true;
+    payrolls: true;
+    salaryHistory: true;
+    team: true;
+  };
+}>;
 
 export async function createEmployeeAction(formData: FormData) {
   const headerList = await headers();
   const session = await auth.api.getSession({ headers: headerList });
 
   if (!session || session.user.role !== "ADMIN") {
-    return { error: "Unauthorized" };
+    return { error: "Unauthorized — only admin can create employees" };
   }
 
   const name = String(formData.get("name"));
-  if (!name) return { error: "Name is required" };
   const email = String(formData.get("email"));
-  if (!email) return { error: "Email is required" };
   const role = String(formData.get("role"));
   const departmentId = String(formData.get("departmentId"));
+
+  if (!name) return { error: "Name is required" };
+  if (!email) return { error: "Email is required" };
   if (!departmentId) return { error: "Department is required" };
-  
+
+  if (role === "ADMIN")
+    return { error: "Admin cannot be created from this form" };
 
   try {
-
-    if (role === "ADMIN") {
-      return { error: "Admin cannot be created from this form" };
-    }
-
     // ❌ Prevent creating user that already exists
-    const exists = await prisma.user.findUnique({ where: { email } });
-    if (exists) return { error: "User already exists" };
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) return { error: "User already exists" };
 
     // ✔ Fetch department + its branch + company
     const department = await prisma.department.findUnique({
@@ -45,225 +79,114 @@ export async function createEmployeeAction(formData: FormData) {
 
     if (!department) return { error: "Department not found" };
 
-    const branchId = department.branchId;
+    // const branchId = department.branchId;
     const companyId = department.branch.companyId;
 
-
     // 1️⃣ Create user WITHOUT password (BetterAuth accepts)
-      const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      role: role === "MANAGER" ? "MANAGER" : "EMPLOYEE",
-      companyId,
-      branchId,
-      departmentId,
-    },
-  });
-  
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        role: role === "HR" ? "HR" : "EMPLOYEE",
 
+        company: {
+          connect: { id: companyId },
+        },
 
-  // 2️⃣ Create Employee profile (empty for now)
-  await prisma.employee.create({
-    data: {
-      userId: user.id,
-    },
-  });
+        employee: {
+          create: {
+            department: { connect: { id: departmentId } },
+          },
+        },
+      },
+      include: {
+        employee: true,
+      },
+    });
 
-   // 3️⃣ Generate onboarding token
-  const token = randomBytes(32).toString("hex");
-  const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+    // 3️⃣ Generate onboarding token
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
 
-  await prisma.inviteToken.create({
-    data: {
-      token,
-      userId: user.id,
-      expiresAt,
-    },
-  });
+    await prisma.inviteToken.create({
+      data: {
+        token,
+        userId: user.id,
+        expiresAt,
+      },
+    });
 
-  // 4️⃣ Send onboarding email
-  const link = `${process.env.NEXT_PUBLIC_API_URL}/auth/create-password?token=${token}`;
+    // 4️⃣ Send onboarding email
+    const link = `${process.env.NEXT_PUBLIC_API_URL}/auth/create-password?token=${token}`;
 
-  await sendEmailAction({
-    to: email,
-    subject: "Welcome - Set Your Password",
-    meta: {
-      description:
-        "Your account has been created. Please click the link below to set your password.",
-      link,
-    },
-  });
-  
-      // return { success: true, redirect: `/dashboard/employees/${employee.id}` };
-      
-      return { success: true };
+    await sendEmailAction({
+      to: email,
+      subject: "Welcome - Set Your Password",
+      meta: {
+        description:
+          "Your account has been created. Please click the link below to set your password.",
+        link,
+      },
+    });
 
-    } catch (err) {
-      console.error(err);
-      return { error: "Failed to create employee" };
-    }
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { error: "Failed to create employee" };
+  }
 }
 
-export async function getEmployeeAction(id: string) {
+// Get single employee with user info
+
+export async function getEmployeeAction(
+  id: string
+): Promise<EmployeeWithUser | null> {
   return await prisma.employee.findUnique({
     where: { id },
     include: {
-      user: {include: { department: true, branch: true, company: true } },
+      user: true,
+      department: { include: { branch: { include: { company: true } } } },
+      manager: { select: { id: true, user: { select: { name: true } } } },
+      shift: true,
+      assets: true,
+      attendance: true,
+      documents: true,
+      leaveBalance: true,
+      leaves: true,
+      overtimes: true,
+      payrolls: true,
+      salaryHistory: true,
+      team: true,
     },
   });
 }
 
-export async function getEmployeesAction(): Promise<EmployeeWithUser[]>  {
-  return await prisma.employee.findMany({
-  include: {
-    user: true,
-  },
+// Get all employees with user info
 
+export async function getEmployeesAction(): Promise<EmployeeWithUser[]> {
+  return await prisma.employee.findMany({
+    include: {
+      user: true,
+      department: { include: { branch: { include: { company: true } } } },
+      manager: { select: { id: true, user: { select: { name: true } } } },
+      shift: true,
+      assets: true,
+      attendance: true,
+      documents: true,
+      leaveBalance: true,
+      leaves: true,
+      overtimes: true,
+      payrolls: true,
+      salaryHistory: true,
+      team: true,
+    },
     orderBy: {
       createdAt: "desc",
     },
   });
 }
 
-// export async function updateEmployeeAction(id: string, data: Prisma.EmployeeUpdateInput) {
-  // return await prisma.employee.update({
-  //   where: { id },
-  //   data,
-  //   include: {
-  //     user: true,
-  //   },
-  // });
-
-//   export async function updateEmployeeAction(
-//   // employeeId: string,
-//   // data: {
-//   //   user?: { name?: string; email?: string };
-//   // } & Omit<Prisma.EmployeeUpdateInput, "user">
-//   formData: FormData
-// ) {const headersList = await headers();
-//   const session = await auth.api.getSession({ headers: headersList });
-//   if (!session || session.user.role !== "ADMIN") {
-//     throw new Error("Unauthorized");
-//   }
-
-//   const companyId = session.user.companyId;
-//   if (!companyId) {
-//     throw new Error("No company found for this user");
-//   }
-//    return await prisma.employee.update({
-//     where: { id:employeeId },
-//     data: {
-//       phone: data.phone,
-//       gender: data.gender,
-//       nationality: data.nationality,
-//       dateOfBirth: data.dateOfBirth,
-//       maritalStatus: data.maritalStatus,
-//       address: data.address,
-//       empId: data.empId,
-//       jobTitle: data.jobTitle,
-//       position: data.position,
-//       basicSalary: data.basicSalary,
-//       allowances: data.allowances,
-//       totalSalary: data.totalSalary,
-//       status: data.status,
-//       emergencyName: data.emergencyName,
-//       emergencyPhone: data.emergencyPhone,
-//       emergencyRelation: data.emergencyRelation,
-//       iqamaNo: data.iqamaNo,
-//       iqamaExpiry: data.iqamaExpiry,
-//       passportNo: data.passportNo,
-//       passportExpiry: data.passportExpiry,
-//       joinDate: data.joinDate,
-//       contractType: data.contractType,
-//       image: data.image,
-//       user: data.user ? { update: { ...data.user } } : undefined,
-//     },
-//     include: { user: true },
-//   });
-// }
-
-// export async function updateEmployeeAction(formData: FormData) {
-//   try{
-//   const headersList = await headers();
-//   const session = await auth.api.getSession({ headers: headersList });
-
-//   if (!session || session.user.role !== "ADMIN") {
-//     throw new Error("Unauthorized");
-//   }
-
-//   const employeeId = formData.get("employeeId")?.toString();
-//   if (!employeeId) throw new Error("Employee ID missing");
-
-//   // Helper for dates
-//   const parseDate = (v: FormDataEntryValue | null) =>
-//     v ? new Date(v.toString()) : null;
-
-//   // Extract Employee fields
-//   const data = {
-//     empId: formData.get("empId")?.toString() || null,
-//     phone: formData.get("phone")?.toString() || null,
-//     gender: formData.get("gender")?.toString() || null,
-//     nationality: formData.get("nationality")?.toString() || null,
-//     dateOfBirth: parseDate(formData.get("dateOfBirth")),
-//     maritalStatus: formData.get("maritalStatus")?.toString() || null,
-//     address: formData.get("address")?.toString() || null,
-
-//     emergencyName: formData.get("emergencyName")?.toString() || null,
-//     emergencyPhone: formData.get("emergencyPhone")?.toString() || null,
-//     emergencyRelation: formData.get("emergencyRelation")?.toString() || null,
-
-//     iqamaNo: formData.get("iqamaNo")?.toString() || null,
-//     iqamaExpiry: parseDate(formData.get("iqamaExpiry")),
-//     passportNo: formData.get("passportNo")?.toString() || null,
-//     passportExpiry: parseDate(formData.get("passportExpiry")),
-
-//     jobTitle: formData.get("jobTitle")?.toString() || null,
-//     joinDate: parseDate(formData.get("joinDate")),
-//     contractType: formData.get("contractType")?.toString() || null,
-//     position: formData.get("position")?.toString() || null,
-//     basicSalary: formData.get("basicSalary")
-//       ? Number(formData.get("basicSalary"))
-//       : null,
-//     allowances: formData.get("allowances")
-//       ? Number(formData.get("allowances"))
-//       : null,
-//     totalSalary: formData.get("totalSalary")
-//       ? Number(formData.get("totalSalary"))
-//       : null,
-
-//     status: formData.get("status")?.toString() || null,
-//   };
-
-//   // User fields
-//   const userUpdate = {
-//     name: formData.get("userName")?.toString(),
-//     email: formData.get("userEmail")?.toString(),
-//   };
-
-//   // Remove empty values for user
-//   Object.keys(userUpdate).forEach((key) => {
-//     if (!userUpdate[key as keyof typeof userUpdate]) {
-//       delete userUpdate[key as keyof typeof userUpdate];
-//     }
-//   });
-
-//   const updated = await prisma.employee.update({
-//     where: { id: employeeId },
-//     data: {
-//       ...data,
-//       user: Object.keys(userUpdate).length
-//         ? { update: userUpdate }
-//         : undefined,
-//     },
-//     include: { user: true },
-//   });
-
-//   return { success: true, employee: updated };
-// } catch (err) {
-//   return { error: "Failed to update employee" };
-// }
-// }
+// Update employee action
 
 export async function updateEmployeeAction(formData: FormData) {
   try {
@@ -278,8 +201,24 @@ export async function updateEmployeeAction(formData: FormData) {
     if (!employeeId) throw new Error("Employee ID missing");
 
     // Field groups
-    const dateFields = ["dateOfBirth", "iqamaExpiry", "passportExpiry", "joinDate","insuranceIssueDate","insuranceExpiryDate"];
-    const numberFields = ["basicSalary", "housingAllowance", "transportationAllowance", "foodAllowance", "mobileAllowance", "otherAllowance"];
+    const dateFields = [
+      "dateOfBirth",
+      "iqamaExpiry",
+      "passportExpiry",
+      "joinDate",
+      "insuranceIssueDate",
+      "insuranceExpiryDate",
+    ];
+    const numberFields = [
+      "basicSalary",
+      "housingAllowance",
+      "transportationAllowance",
+      "foodAllowance",
+      "mobileAllowance",
+      "otherAllowance",
+    ];
+
+    const relationalFields = ["jobTitle", "department", "manager", "shift"];
 
     const employeeFields = [
       "empId",
@@ -308,31 +247,28 @@ export async function updateEmployeeAction(formData: FormData) {
       "status",
       ...dateFields,
       ...numberFields,
+      ...relationalFields,
     ];
 
     const data: any = {};
 
     // Build employee payload ONLY from submitted fields
     for (const key of employeeFields) {
-      const raw = formData.get(key);
+      const value = formData.get(key);
 
       // Do NOT overwrite existing values unless the field was submitted
-      if (raw === null || raw === "") continue;
+      if (!value || value.toString().trim() === "") continue;
 
       // Date fields
       if (dateFields.includes(key)) {
-        data[key] = new Date(raw.toString());
-        continue;
+        data[key] = new Date(value.toString());
+      } else if (numberFields.includes(key)) {
+        data[key] = Number(value);
+      } else if (relationalFields.includes(key)) {
+        data[key] = { connect: { id: value.toString() } };
+      } else {
+        data[key] = value.toString();
       }
-
-      // Number fields
-      if (numberFields.includes(key)) {
-        data[key] = Number(raw);
-        continue;
-      }
-
-      // Normal string fields
-      data[key] = raw.toString();
     }
 
     // -----------------------------
@@ -358,9 +294,25 @@ export async function updateEmployeeAction(formData: FormData) {
       where: { id: employeeId },
       data: {
         ...data,
-        user: Object.keys(userUpdate).length ? { update: userUpdate } : undefined,
+        user: Object.keys(userUpdate).length
+          ? { update: userUpdate }
+          : undefined,
       },
-      include: { user: true },
+      include: {
+        user: true,
+        department: { include: { branch: { include: { company: true } } } },
+        manager: { select: { id: true, user: { select: { name: true } } } },
+        shift: true,
+        assets: true,
+        attendance: true,
+        documents: true,
+        leaveBalance: true,
+        leaves: true,
+        overtimes: true,
+        payrolls: true,
+        salaryHistory: true,
+        team: true,
+      },
     });
 
     return { success: true, employee: updated };
@@ -370,8 +322,7 @@ export async function updateEmployeeAction(formData: FormData) {
   }
 }
 
-
-
+// Delete employee action
 export async function deleteEmployeeAction(id: string) {
   return await prisma.employee.delete({ where: { id } });
 }
@@ -385,8 +336,7 @@ export async function updateEmpImageAction(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
-  const employeeId = formData.get("employeeId") as string | null;
-
+  const employeeId = formData.get("employeeId")?.toString();
   if (!employeeId) {
     throw new Error("No employee selected to update");
   }
@@ -411,7 +361,7 @@ export async function updateEmpImageAction(formData: FormData) {
     }
 
     if (imageFile.size > 2 * 1024 * 1024) {
-      return { error: "Logo image must be less than 2MB." };
+      return { error: "Image must be less than 2MB." };
     }
 
     // Delete old logo if exists
@@ -424,7 +374,12 @@ export async function updateEmpImageAction(formData: FormData) {
 
     // Save new file
     const bytes = Buffer.from(await imageFile.arrayBuffer());
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "employee");
+    const uploadsDir = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      "employee"
+    );
 
     await fs.mkdir(uploadsDir, { recursive: true });
 
@@ -438,8 +393,8 @@ export async function updateEmpImageAction(formData: FormData) {
   }
 
   await prisma.employee.update({
-    where: { id:employeeId },
-    data:{ image:newImagePath ?? employee.image },
+    where: { id: employeeId },
+    data: { image: newImagePath ?? employee.image },
   });
 
   return { success: true };

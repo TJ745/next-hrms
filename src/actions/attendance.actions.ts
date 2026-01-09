@@ -1,140 +1,241 @@
-  "use server";
-import { auth } from "@/lib/auth";
+"use server";
+
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { AttendanceStatus } from "@prisma/client";
 
-function getHoursDiff(start: Date, end: Date) {
-  return Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
+/* ---------------------------------- utils --------------------------------- */
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
-// Clock-in
-export async function clockIn(employeeId: string, shiftId?: string) {
-const headersList = await headers();
-const session = await auth.api.getSession({ headers: headersList });
+function endOfToday() {
+  const d = new Date();
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
 
-  // "use server";
+function diffMinutes(a: Date, b: Date) {
+  return Math.max(0, Math.floor((a.getTime() - b.getTime()) / 60000));
+}
+
+/* --------------------------------- session -------------------------------- */
+async function getEmployeeFromSession() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthorized");
 
   const employee = await prisma.employee.findUnique({
-  where: {  userId : session?.user.id  },
-});
-
-if (!employee) {
-  throw new Error("Employee not found. Please create employee first.");
-}
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const existing = await prisma.attendance.findFirst({
-    where: { employeeId:employee.id, date: today },
-  });
-
-  if (existing) throw new Error("Already clocked in today");
-
-  const shift = shiftId ? await prisma.shift.findUnique({ where: { id: shiftId } }) : null;
-
-  let status = "PRESENT";
-  if (shift && new Date() > shift.startTime) status = "LATE";
-
-  const attendance = await prisma.attendance.create({
-    data: {
-      employeeId:employee.id,
-      date: today,
-      clockIn: new Date(),
-      status,
-      shiftId: shift?.id,
-    },
-  });
-
-  revalidatePath("/attendance");
-  return attendance;
-}
-
-// Clock-out
-export async function clockOut(employeeId: string) {
-  const headersList = await headers();
-const session = await auth.api.getSession({ headers: headersList });
-  // "use server";
-
-  const employee = await prisma.employee.findUnique({
-    where: { userId: session?.user.id },
-  });
-  if (!employee) throw new Error("Employee not found");
-
-const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const attendance = await prisma.attendance.findFirst({
-    where: { employeeId:employee.id, date: today },include:{shift:true},
-  });
-
-  // const attendance = await prisma.attendance.findUnique({ where: { id: employeeId }, include: { shift: true } });
-  if (!attendance) throw new Error("Attendance not found");
-
-  const now = new Date();
-  let earlyLeave = 0;
-  let overtime = 0;
-
-  if (attendance.shift) {
-    const shiftEnd = attendance.shift.endTime;
-    if (now < shiftEnd) earlyLeave = getHoursDiff(now, shiftEnd);
-    else overtime = getHoursDiff(shiftEnd, now);
-  }
-
-  const updated = await prisma.attendance.update({
-    where: { id: attendance.id },
-    data: {
-      clockOut: now,
-      earlyLeave,
-      overtime,
-    },
-  });
-
-  revalidatePath("/attendance");
-  return updated;
-}
-
-// Optional: mark absent
-export async function markAbsent(employeeId: string, date: Date) {
-  // "use server";
-  const employee = await prisma.employee.findUnique({
-    where: { employeeId },
-  });
-  if (!employee) throw new Error("Employee not found");
-
-  const today = new Date(date);
-  today.setHours(0, 0, 0, 0);
-
-  const existing = await prisma.attendance.findFirst({
-    where: { employeeId: employee.id, date: today },
-  });
-  if (existing) throw new Error("Attendance already exists for this date");
-
-  const attendance = await prisma.attendance.create({
-    data: { employeeId: employee.id, date: today, status: "ABSENT" },
-  });
-  revalidatePath("/attendance");
-  return attendance;
-}
-
-// Create Shift
-export async function createShift(name: string, startTime: Date, endTime: Date,employeeIds: string[] = []) {
-  // "use server";
-  const employees = await prisma.employee.findMany({
-    where: { employeeId: { in: employeeIds } },
-  });
-
-  const shift = await prisma.shift.create({
-    data: {
-      name,
-      startTime,
-      endTime,
-      employees: {
-        connect: employees.map((e) => ({ id: e.id })),
+    where: { userId: session.user.id },
+    include: {
+      shift: true,
+      department: {
+        include: {
+          branch: { include: { geoFences: true } },
+        },
       },
     },
   });
 
-  return shift;
+  if (!employee) throw new Error("Employee not found");
+  return employee;
+}
+
+/* --------------------------------- getters -------------------------------- */
+export async function getTodayAttendanceAction() {
+  const employee = await getEmployeeFromSession();
+
+  return prisma.attendance.findFirst({
+    where: {
+      employeeId: employee.id,
+      date: {
+        gte: startOfToday(),
+        lte: endOfToday(),
+      },
+    },
+  });
+}
+
+/* --------------------------------- CHECK IN -------------------------------- */
+export async function checkInAction({
+  lat,
+  lng,
+}: {
+  lat?: number;
+  lng?: number;
+}) {
+  const employee = await getEmployeeFromSession();
+  if (!employee.shift) throw new Error("Shift not assigned");
+
+  const now = new Date();
+
+  // Prevent duplicate check-in
+  const existing = await prisma.attendance.findFirst({
+    where: {
+      employeeId: employee.id,
+      date: {
+        gte: startOfToday(),
+        lte: endOfToday(),
+      },
+    },
+  });
+
+  if (existing?.checkIn) {
+    throw new Error("Already checked in");
+  }
+
+  /* -------------------------- late / present logic ------------------------- */
+  const shiftStart = new Date(now);
+  shiftStart.setHours(
+    employee.shift.startTime.getHours(),
+    employee.shift.startTime.getMinutes(),
+    0,
+    0
+  );
+
+  const graceMs = employee.shift.graceMin * 60 * 1000;
+  const status =
+    now.getTime() > shiftStart.getTime() + graceMs
+      ? AttendanceStatus.LATE
+      : AttendanceStatus.PRESENT;
+
+  /* ------------------------------ create record ---------------------------- */
+  return prisma.attendance.upsert({
+    where: {
+      employeeId_date: {
+        employeeId: employee.id,
+        date: startOfToday(),
+      },
+    },
+    update: {
+      checkIn: now,
+      lat,
+      lng,
+      status,
+    },
+    create: {
+      employeeId: employee.id,
+      date: startOfToday(),
+      checkIn: now,
+      lat,
+      lng,
+      status,
+    },
+  });
+}
+
+/* -------------------------------- CHECK OUT -------------------------------- */
+export async function checkOutAction() {
+  const employee = await getEmployeeFromSession();
+  if (!employee.shift) throw new Error("Shift not assigned");
+
+  const attendance = await prisma.attendance.findFirst({
+    where: {
+      employeeId: employee.id,
+      date: {
+        gte: startOfToday(),
+        lte: endOfToday(),
+      },
+    },
+  });
+
+  if (!attendance?.checkIn) {
+    throw new Error("Check-in required");
+  }
+
+  if (attendance.checkOut) {
+    throw new Error("Already checked out");
+  }
+
+  const now = new Date();
+
+  /* ---------------------- worked & overtime calculation -------------------- */
+  const shiftEnd = new Date(now);
+  shiftEnd.setHours(
+    employee.shift.endTime.getHours(),
+    employee.shift.endTime.getMinutes(),
+    0,
+    0
+  );
+
+  const workedMinutes = diffMinutes(now, attendance.checkIn);
+  const overtimeMinutes = now > shiftEnd ? diffMinutes(now, shiftEnd) : 0;
+
+  return prisma.attendance.update({
+    where: { id: attendance.id },
+    data: {
+      checkOut: now,
+      workedMinutes,
+      overtimeMinutes,
+    },
+  });
+}
+
+/* ------------------------------ MONTH SUMMARY ------------------------------ */
+export async function getMonthlyAttendanceSummaryAction(
+  month: number,
+  year: number
+) {
+  const employee = await getEmployeeFromSession();
+
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0, 23, 59, 59);
+
+  const records = await prisma.attendance.findMany({
+    where: {
+      employeeId: employee.id,
+      date: { gte: start, lte: end },
+    },
+  });
+
+  return {
+    totalDays: records.length,
+    presents: records.filter((r) => r.status === "PRESENT").length,
+    late: records.filter((r) => r.status === "LATE").length,
+    absents: records.filter((r) => r.status === "ABSENT").length,
+    workedMinutes: records.reduce((a, b) => a + (b.workedMinutes ?? 0), 0),
+    overtimeMinutes: records.reduce((a, b) => a + (b.overtimeMinutes ?? 0), 0),
+  };
+}
+
+export async function getAllAttendanceAction() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthorized");
+
+  if (session.user.role === "EMPLOYEE") {
+    throw new Error("Forbidden");
+  }
+
+  const records = await prisma.attendance.findMany({
+    where: {
+      date: {
+        gte: startOfToday(),
+        lte: endOfToday(),
+      },
+    },
+    include: {
+      employee: {
+        include: {
+          user: true,
+          shift: true,
+        },
+      },
+    },
+    orderBy: { date: "desc" },
+  });
+
+  return records.map((r) => ({
+    id: r.id,
+    employeeName: r.employee.user.name,
+    status: r.status,
+    checkIn: r.checkIn,
+    checkOut: r.checkOut,
+    workedMinutes:
+      r.checkIn && r.checkOut
+        ? Math.floor((r.checkOut.getTime() - r.checkIn.getTime()) / 60000)
+        : 0,
+    overtimeMinutes: r.checkOut && r.employee.shiftId ? 0 : 0, // extend logic if needed
+  }));
 }

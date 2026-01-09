@@ -1,7 +1,17 @@
 "use client";
 
 import { deleteUserAction } from "@/actions/delete-user.action";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmployeeWithUser } from "@/types/prisma";
@@ -84,41 +94,37 @@ export const EmployeeColumns: ColumnDef<EmployeeWithUser>[] = [
       const employee = row.original;
       return (
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-          >
-            <Link href={`/dashboard/employees/${employee.id}`}>
-            View
-            </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/dashboard/employees/${employee.id}`}>View</Link>
           </Button>
           <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="destructive" size="sm">
-            Delete
-          </Button>
-        </AlertDialogTrigger>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                Delete
+              </Button>
+            </AlertDialogTrigger>
 
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Employee?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The employee will be permanently removed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Employee?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. The employee will be permanently
+                  removed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
 
-            <AlertDialogAction className="bg-destructive hover:bg-destructive text-white"
-              onClick={() => deleteUserAction({ userId: employee.userId! })}
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                <AlertDialogAction
+                  className="bg-destructive hover:bg-destructive text-white"
+                  onClick={() => deleteUserAction({ userId: employee.userId! })}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       );
     },

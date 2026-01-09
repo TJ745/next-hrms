@@ -28,7 +28,10 @@ import { DataTable } from "./data-table";
 import { ChartPieDonutText } from "@/components/TotalEmployeePieCHart";
 import { ChartLineMultiple } from "@/components/TotalEmployeeLineChart";
 import Image from "next/image";
-import { getDashboardStatsAction, getEmployeesByGender } from "@/actions/dashboard.action";
+import {
+  getDashboardStatsAction,
+  getEmployeesByGender,
+} from "@/actions/dashboard.action";
 import DashboardClock from "./DashboardClock";
 
 async function Dashboard() {
@@ -60,7 +63,6 @@ async function Dashboard() {
 
   const genderData = await getEmployeesByGender();
 
-
   return (
     <main className="w-full">
       <Breadcrumb>
@@ -81,42 +83,37 @@ async function Dashboard() {
 
         <div className="grid grid-cols-3 gap-2 p-2 mt-2">
           <div className="col-span-2 space-y-1 bg-primary-foreground rounded-lg p-4">
-            
             <div className="flex items-center justify-between">
               <div>
-
-              <h1 className="text-xl">
-              Welcome Back,{" "}
-              <span className="font-bold">{session.user.name}! 👋</span>
-            </h1>
-            <p className="text-sm">
-              Here&apos;s what&apos;s happening with your company today.
-            </p>
+                <h1 className="text-xl">
+                  Welcome Back,{" "}
+                  <span className="font-bold">{session.user.name}! 👋</span>
+                </h1>
+                <p className="text-sm">
+                  Here&apos;s what&apos;s happening with your company today.
+                </p>
               </div>
 
-            <div>
-                 <DashboardClock/>        
+              <div>
+                <DashboardClock />
+              </div>
             </div>
-              </div>
           </div>
           <div className="col-span-1 bg-primary-foreground rounded-lg p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div>
-
-              <Image
-                src={company?.logo ?? "/default-logo.png"}
-                alt="company logo"
-                width={80}
-                height={80}
-                />   
-                </div>
-                <div>
-
-              <h1 className="text-xl">{company?.name}</h1>
-              <span className="text-sm">{company?.address}</span>
-                </div>
+                <Image
+                  src={company?.logo ?? "/default-logo.png"}
+                  alt="company logo"
+                  width={80}
+                  height={80}
+                />
+              </div>
+              <div>
+                <h1 className="text-xl">{company?.name}</h1>
+                <span className="text-sm">{company?.address}</span>
+              </div>
             </div>
-            
           </div>
         </div>
 
@@ -228,11 +225,11 @@ async function Dashboard() {
         <div className="grid grid-cols-4 gap-4 mt-4">
           <div className="col-span-1 bg-secondary p-2 rounded-xl">
             <h1 className="text-xl font-bold">Total Employees</h1>
-            <ChartPieDonutText data={genderData} />
+            {/* <ChartPieDonutText data={genderData} /> */}
           </div>
           <div className="col-span-1 bg-secondary p-2 rounded-xl">
             <h1 className="text-xl font-bold">Total Departments</h1>
-            <ChartPieDonutText data={genderData} />
+            {/* <ChartPieDonutText data={genderData} /> */}
           </div>
           <div className="col-span-2 bg-secondary p-2 rounded-xl">
             <h1 className="text-xl font-bold">Team Performance</h1>

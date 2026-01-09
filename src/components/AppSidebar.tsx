@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +12,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
 } from "./ui/sidebar";
-import { sidebarMenuItems } from "../../data/SidebarMenu";
+import { sidebarMenuItems } from "../data/SidebarMenu";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "../../public/logo/logo.png";
@@ -22,9 +21,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./ui/collapsible";
+import { UserRole } from "@/types/enums";
 
 interface AppSidebarProps {
-  role: "ADMIN" | "USER" | "MANAGER";
+  role: UserRole;
 }
 
 function AppSidebar({ role }: AppSidebarProps) {

@@ -1,82 +1,57 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-enum UserRole {
-  ADMIN
-  MANAGER
-  EMPLOYEE
-}
-
-enum Status {
-  ACTIVE
-  INACTIVE
 }
 
 model User {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
+  id            String                   @id @default(uuid())
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @default(now()) @updatedAt
   name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false)
-  role          UserRole @default(EMPLOYEE)
-
-  sessions Session[]
-  accounts Account[]
-
-  banned     Boolean?  @default(false)
-  banReason  String?
-  banExpires DateTime?
-
-  companyId    String?
-  company      Company?    @relation(fields: [companyId], references: [id])
-  branchId     String?
-  branch       Branch?     @relation(fields: [branchId], references: [id])
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-
-  employee     Employee?
-  inviteTokens InviteToken[]
-
-  jobTitles JobTitle[]
+  email         String                   @unique
+  emailVerified Boolean                  @default(false)
+  role          UserRole                 @default(EMPLOYEE)
+  banned        Boolean?                 @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  companyId     String?
+  inviteTokens  InviteToken[]
+  notifications Notification[]
+  preferences   NotificationPreference[]
+  accounts      Account[]
+  employee      Employee?
+  jobTitles     JobTitle[]
+  sessions      Session[]
+  company       Company?                 @relation(fields: [companyId], references: [id])
 
   @@map("users")
 }
 
 model Session {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  expiresAt DateTime
-  token     String   @unique
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  expiresAt      DateTime
+  token          String   @unique
+  ipAddress      String?
+  userAgent      String?
+  userId         String
   impersonatedBy String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
 
 model Account {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id                    String    @id @default(uuid())
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -84,15 +59,15 @@ model Account {
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("accounts")
 }
 
 model Verification {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
   identifier String
   value      String
   expiresAt  DateTime
@@ -104,7 +79,6 @@ model Company {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   name      String
   logo      String?
   vatNumber String?
@@ -113,103 +87,99 @@ model Company {
   email     String?
   website   String?
   address   String?
-
-  users    User[]
-  branches Branch[]
+  branches  Branch[]
+  users     User[]
 
   @@map("companies")
 }
 
 model Branch {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  name    String
-  address String?
-  phone   String?
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  departments Department[]
-  users       User[]
+  id           String        @id @default(uuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  name         String
+  address      String?
+  phone        String?
+  companyId    String
+  geoFences    GeoFence[]
+  holidays     Holiday[]
+  weekendRules WeekendRule[]
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  departments  Department[]
 
   @@map("branches")
 }
 
 model Department {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  name String
-
-  branchId String
-  branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-
-  users User[]
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  name      String
+  branchId  String
+  branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  employees Employee[]
 
   @@map("departments")
 }
 
 model Employee {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  image         String?
-  phone         String?
-  gender        String?
-  nationality   String?
-  dateOfBirth   DateTime?
-  maritalStatus String?
-  address       String?
-
-  emergencyName     String?
-  emergencyPhone    String?
-  emergencyRelation String?
-
-  iqamaNo        String?
-  iqamaExpiry    DateTime?
-  passportNo     String?
-  passportExpiry DateTime?
-
-  empId            String?
-  jobTitle         String?
-  employmentType   String? // Full-time, Part-time, Contract
-  joinDate         DateTime?
-  contractValidity String? // in months
-  probationPeriod  String? // in months
-  workingHours     String?
-  workingDays      String?
-  workLocation     String?
-
-  bankName    String?
-  bankAccount String?
-  bankIBAN    String?
-
+  id                      String             @id @default(uuid())
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  empId                   String?            @unique
+  image                   String?
+  phone                   String?
+  gender                  String?
+  nationality             String?
+  dateOfBirth             DateTime?
+  maritalStatus           String?
+  address                 String?
+  emergencyName           String?
+  emergencyPhone          String?
+  emergencyRelation       String?
+  iqamaNo                 String?
+  iqamaExpiry             DateTime?
+  passportNo              String?
+  passportExpiry          DateTime?
+  jobTitle                String?
+  joinDate                DateTime?
   basicSalary             Float?
-  housingAllowance        Float?
-  transportationAllowance Float?
+  userId                  String             @unique
+  bankAccount             String?
+  bankIBAN                String?
+  bankName                String?
+  contractValidity        String?
+  departmentId            String
+  employmentType          String?
   foodAllowance           Float?
+  housingAllowance        Float?
+  insuranceCategory       String?
+  insuranceExpiryDate     DateTime?
+  insuranceIssueDate      DateTime?
+  insuranceName           String?
+  managerId               String?
   mobileAllowance         Float?
   otherAllowance          Float?
-
-  insuranceName       String?
-  insuranceCategory   String? // e.g., Health, Dental, Vision
-  insuranceIssueDate  DateTime?
-  insuranceExpiryDate DateTime?
-
-  status String? // Active, Terminated, etc.
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  orgNodes OrgNode[]
-
-  attendances Attendance[]
-  shifts      Shift[]      @relation("ShiftEmployees")
+  probationPeriod         String?
+  shiftId                 String?
+  transportationAllowance Float?
+  workLocation            String?
+  workingDays             String?
+  workingHours            String?
+  status                  Status             @default(ACTIVE)
+  assets                  Asset[]
+  attendance              Attendance[]
+  documents               EmployeeDocument[]
+  leaveBalance            LeaveBalance[]
+  leaves                  LeaveRequest[]
+  overtimes               Overtime[]
+  payrolls                Payroll[]
+  salaryHistory           SalaryHistory[]
+  department              Department         @relation(fields: [departmentId], references: [id])
+  manager                 Employee?          @relation("Manager", fields: [managerId], references: [id])
+  team                    Employee[]         @relation("Manager")
+  shift                   Shift?             @relation(fields: [shiftId], references: [id])
+  user                    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("employees")
 }
@@ -219,83 +189,268 @@ model InviteToken {
   token     String   @unique
   createdAt DateTime @default(now())
   expiresAt DateTime
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-}
-
-model OrgNode {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
-  employeeId String? // optional: empty node when no employee assigned yet
-  employee   Employee? @relation(fields: [employeeId], references: [id])
-
-  parentId String? // self relation
-  parent   OrgNode? @relation("OrgNodeHierarchy", fields: [parentId], references: [id])
-
-  children OrgNode[] @relation("OrgNodeHierarchy")
-
-  @@map("org_nodes")
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model JobTitle {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  name   String
-  status Status @default(ACTIVE)
-
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String
   createdById String
-  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  status      Status   @default(ACTIVE)
+  createdBy   User     @relation(fields: [createdById], references: [id])
 
   @@map("jobtitles")
 }
 
 model Shift {
-  id   String @id @default(uuid())
-  name String
-
+  id        String     @id @default(cuid())
+  name      String
   startTime DateTime
   endTime   DateTime
-
-  employees   Employee[]   @relation("ShiftEmployees")
-  attendances Attendance[]
-
-  @@map("shifts")
+  graceMin  Int
+  employees Employee[]
 }
 
 model Attendance {
-  id String @id @default(uuid())
+  id              String           @id @default(cuid())
+  employeeId      String
+  date            DateTime
+  checkIn         DateTime?
+  checkOut        DateTime?
+  lat             Float?
+  lng             Float?
+  status          AttendanceStatus
+  workedMinutes   Int?
+  overtimeMinutes Int?
+  employee        Employee         @relation(fields: [employeeId], references: [id])
 
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  employeeId String
+  @@unique([employeeId, date])
+}
 
-  date     DateTime
-  clockIn  DateTime?
-  clockOut DateTime?
+model GeoFence {
+  id        String @id @default(cuid())
+  branchId  String
+  latitude  Float
+  longitude Float
+  radiusM   Int
+  branch    Branch @relation(fields: [branchId], references: [id])
+}
 
-  status AttendanceStatus @default(PRESENT)
+model WeekendRule {
+  id       String  @id @default(cuid())
+  branchId String
+  day      WeekDay
+  isOff    Boolean @default(true)
+  branch   Branch  @relation(fields: [branchId], references: [id])
 
-  shift   Shift?  @relation(fields: [shiftId], references: [id])
-  shiftId String?
+  @@unique([branchId, day])
+}
 
-  overtime Float? // hours
-
-  earlyLeave Float? // hours
-
-  notes String?
-
+model Holiday {
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime
+  branchId  String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  branch    Branch?  @relation(fields: [branchId], references: [id])
+}
 
-  @@map("attendances")
+model LeaveType {
+  id            String         @id @default(cuid())
+  name          String
+  maxPerYear    Int
+  paid          Boolean
+  leaveBalances LeaveBalance[]
+  leaveRequests LeaveRequest[]
+}
+
+model LeaveBalance {
+  id          String    @id @default(cuid())
+  employeeId  String
+  leaveTypeId String
+  year        Int
+  balance     Int
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  leaveType   LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([employeeId, leaveTypeId, year])
+}
+
+model LeaveRequest {
+  id          String      @id @default(cuid())
+  employeeId  String
+  leaveTypeId String
+  fromDate    DateTime
+  toDate      DateTime
+  reason      String
+  status      LeaveStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  approvals   Approval[]
+  employee    Employee    @relation(fields: [employeeId], references: [id])
+  leaveType   LeaveType   @relation(fields: [leaveTypeId], references: [id])
+}
+
+model Overtime {
+  id         String     @id @default(cuid())
+  employeeId String
+  date       DateTime
+  hours      Float
+  approved   Boolean    @default(false)
+  approvals  Approval[]
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+}
+
+model Payroll {
+  id          String   @id @default(cuid())
+  employeeId  String
+  month       Int
+  year        Int
+  baseSalary  Float
+  overtimePay Float
+  deductions  Float
+  netSalary   Float
+  employee    Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([employeeId, month, year])
+}
+
+model SalaryHistory {
+  id            String   @id @default(cuid())
+  employeeId    String
+  salary        Float
+  effectiveFrom DateTime
+  reason        String?
+  employee      Employee @relation(fields: [employeeId], references: [id])
+}
+
+model Asset {
+  id         String      @id @default(cuid())
+  name       String
+  serialNo   String      @unique
+  status     AssetStatus
+  employeeId String?
+  assignedAt DateTime?
+  returnedAt DateTime?
+  employee   Employee?   @relation(fields: [employeeId], references: [id])
+}
+
+model EmployeeDocument {
+  id         String       @id @default(cuid())
+  employeeId String
+  type       DocumentType
+  fileName   String
+  fileUrl    String
+  expiryDate DateTime?
+  notified   Boolean      @default(false)
+  uploadedAt DateTime     @default(now())
+  employee   Employee     @relation(fields: [employeeId], references: [id])
+}
+
+model Approval {
+  id             String        @id @default(cuid())
+  type           ApprovalType
+  refId          String
+  level          ApprovalLevel
+  approverId     String
+  status         LeaveStatus
+  comments       String?
+  createdAt      DateTime      @default(now())
+  leaveRequestId String?
+  overtimeId     String?
+  leaveRequest   LeaveRequest? @relation(fields: [leaveRequestId], references: [id])
+  overtime       Overtime?     @relation(fields: [overtimeId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  refId     String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model NotificationPreference {
+  id       String           @id @default(cuid())
+  userId   String
+  type     NotificationType
+  viaPush  Boolean          @default(true)
+  viaEmail Boolean          @default(false)
+  viaInApp Boolean          @default(true)
+  user     User             @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type])
+}
+
+enum UserRole {
+  ADMIN
+  HR
+  EMPLOYEE
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
 }
 
 enum AttendanceStatus {
   PRESENT
   ABSENT
   LATE
-  ON_LEAVE
+  LEAVE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AssetStatus {
+  ASSIGNED
+  RETURNED
+}
+
+enum ApprovalType {
+  LEAVE
+  OVERTIME
+  ASSET
+}
+
+enum ApprovalLevel {
+  MANAGER
+  HR
+  ADMIN
+}
+
+enum WeekDay {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum DocumentType {
+  ID
+  PASSPORT
+  CONTRACT
+  CERTIFICATE
+  OTHER
+}
+
+enum NotificationType {
+  APPROVAL
+  DOCUMENT_EXPIRY
+  ATTENDANCE
+  PAYROLL
+  SYSTEM
 }
