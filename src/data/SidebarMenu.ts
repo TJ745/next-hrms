@@ -40,11 +40,11 @@ export const sidebarMenuItems = (role: Role): SidebarProps[] => [
     children: [
       {
         title: "My Time Off",
-        url: "/",
+        url: "/dashboard/leave",
       },
       {
         title: "Team Time Off",
-        url: "/",
+        url: "/dashboard/leave/managerapprovals",
       },
       {
         title: "Employee Time Off",
@@ -52,7 +52,7 @@ export const sidebarMenuItems = (role: Role): SidebarProps[] => [
       },
       {
         title: "Settings",
-        url: "/",
+        url: "/dashboard/leave/settings",
       },
     ],
   },

@@ -22,6 +22,15 @@ function diffMinutes(a: Date, b: Date) {
   return Math.max(0, Math.floor((a.getTime() - b.getTime()) / 60000));
 }
 
+function toRad(deg: number) { return (deg * Math.PI) / 180; }
+function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371e3;
+  const φ1 = toRad(lat1), φ2 = toRad(lat2), Δφ = toRad(lat2 - lat1), Δλ = toRad(lng2 - lng1);
+  const a = Math.sin(Δφ/2)**2 + Math.cos(φ1)*Math.cos(φ2)*Math.sin(Δλ/2)**2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R*c;
+}
+
 /* --------------------------------- session -------------------------------- */
 async function getEmployeeFromSession() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -33,7 +42,7 @@ async function getEmployeeFromSession() {
       shift: true,
       department: {
         include: {
-          branch: { include: { geoFences: true } },
+          branch: { include: { geoFences: true,weekendRules: true, holidays: true } },
         },
       },
     },
@@ -43,7 +52,19 @@ async function getEmployeeFromSession() {
   return employee;
 }
 
-/* --------------------------------- getters -------------------------------- */
+/* -------------------- GeoFence & Weekend/Holiday -------------------- */
+function checkGeoFence(lat: number, lng: number, geoFences: {latitude:number,longitude:number,radiusM:number}[]) {
+  return geoFences.some(f => distanceMeters(lat,lng,f.latitude,f.longitude) <= f.radiusM);
+}
+function isWeekendOrHoliday(date: Date, weekendRules: any[], holidays: any[]) {
+  const dayMap = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+  const today = dayMap[date.getDay()];
+  const isWeekend = weekendRules.some(r => r.day===today && r.isOff);
+  const isHoliday = holidays.some(h => h.date.toDateString() === date.toDateString());
+  return isWeekend || isHoliday;
+}
+
+/* -------------------- Attendance Actions -------------------- */
 export async function getTodayAttendanceAction() {
   const employee = await getEmployeeFromSession();
 
@@ -70,6 +91,13 @@ export async function checkInAction({
   if (!employee.shift) throw new Error("Shift not assigned");
 
   const now = new Date();
+  if (isWeekendOrHoliday(now, employee.department.branch.weekendRules, employee.department.branch.holidays)) {
+    throw new Error("Cannot check-in on weekend/holiday");
+  }
+
+  if (lat != null && lng != null && !checkGeoFence(lat, lng, employee.department.branch.geoFences)) {
+    throw new Error("Outside branch location");
+  }
 
   // Prevent duplicate check-in
   const existing = await prisma.attendance.findFirst({
@@ -238,4 +266,80 @@ export async function getAllAttendanceAction() {
         : 0,
     overtimeMinutes: r.checkOut && r.employee.shiftId ? 0 : 0, // extend logic if needed
   }));
+}
+
+
+/* -------------------- Dashboard -------------------- */
+export async function getAttendanceDashboard(month: number, year: number) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session || session.user.role === "EMPLOYEE") throw new Error("Forbidden");
+
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0, 23, 59, 59);
+
+  const records = await prisma.attendance.findMany({
+    where: { date: { gte: start, lte: end } },
+    include: {
+      employee: {
+        include: {
+          department: { include: { branch: true } },
+          user: true,
+        },
+      },
+    },
+  });
+
+  const stats: {
+    company: { presents: number; late: number; absents: number; totalEmployees: Set<string> };
+    branches: Record<string, { presents: number; late: number; absents: number; totalEmployees: Set<string>; departments: Record<string, any> }>;
+  } = {
+    company: { presents: 0, late: 0, absents: 0, totalEmployees: new Set() },
+    branches: {},
+  };
+
+  records.forEach(r => {
+    const branchName = r.employee.department.branch.name;
+    const depName = r.employee.department.name;
+    const empId = r.employee.id;
+
+    // Company-level
+    stats.company.totalEmployees.add(empId);
+    if (r.status === AttendanceStatus.PRESENT) stats.company.presents++;
+    if (r.status === AttendanceStatus.LATE) stats.company.late++;
+    if (r.status === AttendanceStatus.ABSENT) stats.company.absents++;
+
+    // Branch-level
+    stats.branches[branchName] = stats.branches[branchName] || {
+      presents: 0,
+      late: 0,
+      absents: 0,
+      totalEmployees: new Set(),
+      departments: {},
+    };
+    stats.branches[branchName].totalEmployees.add(empId);
+    if (r.status === AttendanceStatus.PRESENT) stats.branches[branchName].presents++;
+    if (r.status === AttendanceStatus.LATE) stats.branches[branchName].late++;
+    if (r.status === AttendanceStatus.ABSENT) stats.branches[branchName].absents++;
+
+    // Department-level
+    stats.branches[branchName].departments[depName] = stats.branches[branchName].departments[depName] || {
+      presents: 0,
+      late: 0,
+      absents: 0,
+      totalEmployees: new Set(),
+    };
+    stats.branches[branchName].departments[depName].totalEmployees.add(empId);
+    if (r.status === AttendanceStatus.PRESENT) stats.branches[branchName].departments[depName].presents++;
+    if (r.status === AttendanceStatus.LATE) stats.branches[branchName].departments[depName].late++;
+    if (r.status === AttendanceStatus.ABSENT) stats.branches[branchName].departments[depName].absents++;
+  });
+
+  // Convert Sets to counts
+  stats.company.totalEmployees = stats.company.totalEmployees.size;
+  Object.values(stats.branches).forEach(branch => {
+    branch.totalEmployees = branch.totalEmployees.size;
+    Object.values(branch.departments).forEach(dep => dep.totalEmployees = dep.totalEmployees.size);
+  });
+
+  return stats;
 }

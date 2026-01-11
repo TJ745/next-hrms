@@ -21,7 +21,9 @@ import {
   Asterisk,
   Building,
   Building2,
+  Calendar,
   Clock,
+  Globe,
   LucideBuilding,
   SlashIcon,
   User,
@@ -53,18 +55,21 @@ import { Employee } from "../columns";
 import CompanyForm from "./companies/CompanyForm";
 import { UserColumns } from "./users/columns";
 
-
+import GeoFenceForm from "./geofence/GeoFenceForm";
+import { GeoFenceColumns } from "./geofence/columns";
+import { getGeoFencesAction } from "@/actions/geofence.actions";
 
 async function Settings() {
   const headersList = await headers();
-  const session = await auth.api.getSession({headers: headersList});
+  const session = await auth.api.getSession({ headers: headersList });
 
   const branches = await getBranchesAction();
-
 
   const departments = await getDepartmentsAction();
 
   const jobtitles = await getJobTitleAction();
+
+  const geoFence = await getGeoFencesAction();
 
   const users = await prisma.user.findMany({
     orderBy: { name: "asc" },
@@ -81,7 +86,6 @@ async function Settings() {
   const company = await prisma.company.findUnique({
     where: { id: session?.user.companyId },
   });
-
 
   return (
     <div>
@@ -117,9 +121,20 @@ async function Settings() {
             <TabsTrigger value="user">
               <User /> Users
             </TabsTrigger>
+
+            <TabsTrigger value="geoFence">
+              <Globe /> Geo Fence
+            </TabsTrigger>
+            <TabsTrigger value="holidays">
+              <Calendar /> Holidays
+            </TabsTrigger>
+            <TabsTrigger value="weekendRules">
+              <Calendar /> Weekend Rules
+            </TabsTrigger>
             <TabsTrigger value="workSchedule">
               <Clock /> Work Schedule
             </TabsTrigger>
+
             <TabsTrigger value="password">
               <Asterisk /> Password
             </TabsTrigger>
@@ -130,8 +145,8 @@ async function Settings() {
               <CardHeader>
                 <CardTitle>Company Info</CardTitle>
                 <CardDescription>
-                  Make changes to your company info here. Click update when you&apos;re
-                  done.
+                  Make changes to your company info here. Click update when
+                  you&apos;re done.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6">
@@ -173,7 +188,10 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                <DataTable columns={DepartmentColumns} data={departments as DepartmentType[]} />
+                <DataTable
+                  columns={DepartmentColumns}
+                  data={departments as DepartmentType[]}
+                />
               </div>
             </div>
           </TabsContent>
@@ -192,7 +210,10 @@ async function Settings() {
             </Card>
             <div className="mt-2">
               <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
-                <DataTable columns={jobTitleColumns} data={jobtitles as JobTitleType[]} />
+                <DataTable
+                  columns={jobTitleColumns}
+                  data={jobtitles as JobTitleType[]}
+                />
               </div>
             </div>
           </TabsContent>
@@ -216,30 +237,66 @@ async function Settings() {
             </div>
           </TabsContent>
 
-          <TabsContent value="workSchedule">
+          <TabsContent value="geoFence">
             <Card>
               <CardHeader>
-                <CardTitle>Password</CardTitle>
+                <CardTitle>Geo Fence</CardTitle>
                 <CardDescription>
-                  Change your password here. After saving, you&apos;ll be logged
-                  out.
+                  Create and manage your geo fence here.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6">
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-current">Current password</Label>
-                  <Input id="tabs-demo-current" type="password" />
-                </div>
-                <div className="grid gap-3">
-                  <Label htmlFor="tabs-demo-new">New password</Label>
-                  <Input id="tabs-demo-new" type="password" />
-                </div>
+                <GeoFenceForm branches={branches} />
               </CardContent>
-              <CardFooter>
-                <Button>Save password</Button>
-              </CardFooter>
+            </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <DataTable columns={GeoFenceColumns} data={geoFence} />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* <TabsContent value="holidays">
+            <Card>
+              <CardHeader>
+                <CardTitle>Holidays</CardTitle>
+                <CardDescription>
+                  Create and manage your holidays here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <HolidayForm />
+              </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="weekendRules">
+            <Card>
+              <CardHeader>
+                <CardTitle>Weekend Rules</CardTitle>
+                <CardDescription>
+                  Create and manage your weekend rules here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <WeekendRulesForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="workSchedule">
+            <Card>
+              <CardHeader>
+                <CardTitle>Work Schedule</CardTitle>
+                <CardDescription>
+                  Create and manage your work schedule here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6">
+                <WorkScheduleForm />
+              </CardContent>
+            </Card>
+          </TabsContent> */}
 
           <TabsContent value="password">
             <Card>

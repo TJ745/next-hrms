@@ -38,6 +38,8 @@ Roles: ADMIN, HR, EMPLOYEE
 
 Add role-based middleware for route protection
 
+
+
 PHASE 2: Seed Data & Basic Models
 
 Seed Roles in BetterAuth (ADMIN, HR, EMPLOYEE)
@@ -49,6 +51,8 @@ Seed Leave Types, Shifts, Weekend Rules
 Test DB relations:
 
 Create an employee + link to user + department + shift
+
+
 
 PHASE 3: Employee Module
 
@@ -70,6 +74,8 @@ Upload documents (file → cloud storage like S3 / Vercel Blob)
 
 Show employee profile (include documents, salary history, manager, team)
 
+
+
 PHASE 4: Attendance & Geo-Fencing
 
 Employee check-in/out:
@@ -86,6 +92,8 @@ Attendance dashboard:
 
 Stats per employee, branch, department
 
+
+
 PHASE 5: Leave Management
 
 Leave balances per type/year
@@ -100,6 +108,8 @@ Notifications triggered at each approval stage
 
 Cron job to reset leave balances yearly (optional)
 
+
+
 PHASE 6: Overtime Module
 
 Employee applies for overtime
@@ -109,6 +119,8 @@ Multi-level approval workflow (Manager → HR)
 Overtime affects payroll calculations
 
 Notifications for approvals
+
+
 
 PHASE 7: Payroll & Salary History
 
@@ -128,6 +140,8 @@ Optional: store payroll files (PDF)
 
 Notifications to employee when payroll is generated
 
+
+
 PHASE 8: Assets Module
 
 Admin/HR assign assets
@@ -137,6 +151,9 @@ Track assignedAt / returnedAt
 Multi-level approvals for asset requests (optional)
 
 Notifications when assets assigned or returned
+
+
+
 
 PHASE 9: Holidays & Weekend Rules
 
@@ -151,6 +168,9 @@ Holiday > Weekend > Working Day
 
 Reports should respect holidays/weekends
 
+
+
+
 PHASE 10: Employee Documents
 
 Upload documents with metadata & expiry
@@ -164,6 +184,8 @@ In-app
 Push (Pusher)
 
 Email (optional)
+
+
 
 PHASE 11: Notifications System
 
@@ -183,6 +205,8 @@ Badge count for unread notifications
 
 Auto-clean read notifications older than 30 days
 
+
+
 PHASE 12: Reports & Dashboards
 
 Employee overview
@@ -196,6 +220,8 @@ Payroll summary
 Asset allocation report
 
 Notifications history
+
+
 
 PHASE 13: Security & Roles
 
@@ -211,6 +237,8 @@ Approvals
 
 Asset assignment
 
+
+
 PHASE 14: Testing
 
 Unit tests for core modules (Prisma + APIs)
@@ -222,6 +250,8 @@ Leave request → approval → notification → payroll update
 Attendance with geo-fencing & shift logic
 
 Manual QA for dashboard UI
+
+
 
 PHASE 15: Deployment
 
@@ -244,6 +274,8 @@ Document expiry reminders
 Auto-clean notifications
 
 Leave accrual resets
+
+
 
 PHASE 16: Optional Enhancements
 
