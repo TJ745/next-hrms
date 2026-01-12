@@ -8,33 +8,32 @@ export async function createBranchAction(formData: FormData) {
   const headerList = await headers();
   const session = await auth.api.getSession({ headers: headerList });
 
-   if (!session || !["ADMIN"].includes(session.user.role)) {
+  if (!session || !["ADMIN"].includes(session.user.role)) {
     return { error: "Unauthorized — only admin can create branches." };
   }
 
   const name = String(formData.get("name"));
-    if (!name) return { error: "Branch name is required" };
+  if (!name) return { error: "Branch name is required" };
   const address = String(formData.get("address"));
   // const companyId = String(formData.get("companyId"));
   const phone = String(formData.get("phone"));
 
-
   try {
     if (!session.user.companyId) {
-  return { error: "User does not belong to a company" };
-}
+      return { error: "User does not belong to a company" };
+    }
 
     // 🏢 Create company linked to admin
     const branch = await prisma.branch.create({
       data: {
-      name,
-      address,
-      phone,
-      companyId: session.user.companyId!,
-    }
+        name,
+        address,
+        phone,
+        companyId: session.user.companyId!,
+      },
     });
 
-    return { success: true, return: branch};
+    return { success: true, return: branch };
   } catch (err) {
     console.error(err);
     return { error: "Failed to create branch" };
@@ -48,10 +47,10 @@ export async function getBranchesAction() {
     return [];
   }
   return prisma.branch.findMany({
-    where: { companyId: session?.user.companyId  },
-    include:{
+    where: { companyId: session?.user.companyId },
+    include: {
       company: true,
-    }
+    },
   });
 }
 
@@ -61,4 +60,16 @@ export async function updateBranchAction(id: string, data: any) {
 
 export async function deleteBranchAction(id: string) {
   return await prisma.branch.delete({ where: { id } });
+}
+
+export async function getBranchWithSettings(branchId: string) {
+  return prisma.branch.findUnique({
+    where: { id: branchId },
+    include: {
+      geoFences: true,
+      weekendRules: true,
+      holidays: true,
+      departments: true,
+    },
+  });
 }

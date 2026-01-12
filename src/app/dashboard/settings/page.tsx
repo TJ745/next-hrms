@@ -58,6 +58,15 @@ import { UserColumns } from "./users/columns";
 import GeoFenceForm from "./geofence/GeoFenceForm";
 import { GeoFenceColumns } from "./geofence/columns";
 import { getGeoFencesAction } from "@/actions/geofence.actions";
+import HolidayForm from "./holidays/HolidaysForm";
+import { HolidayColumns } from "./holidays/columns";
+import { getHolidaysAction } from "@/actions/holiday.action";
+import WeekendRuleForm from "./weekend/WeekenRuleForm";
+import { WeekendRuleColumns } from "./weekend/columns";
+import { getWeekendRulesAction } from "@/actions/weekend-rule.action";
+import ShiftForm from "./shifts/ShiftForm";
+import { ShiftColumns } from "./shifts/columns";
+import { getShiftsAction } from "@/actions/shift.action";
 
 async function Settings() {
   const headersList = await headers();
@@ -70,6 +79,12 @@ async function Settings() {
   const jobtitles = await getJobTitleAction();
 
   const geoFence = await getGeoFencesAction();
+
+  const holiday = await getHolidaysAction();
+
+  const weekendRule = await getWeekendRulesAction();
+
+  const shifts = await getShiftsAction();
 
   const users = await prisma.user.findMany({
     orderBy: { name: "asc" },
@@ -256,7 +271,7 @@ async function Settings() {
             </div>
           </TabsContent>
 
-          {/* <TabsContent value="holidays">
+          <TabsContent value="holidays">
             <Card>
               <CardHeader>
                 <CardTitle>Holidays</CardTitle>
@@ -265,9 +280,14 @@ async function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6">
-                <HolidayForm />
+                <HolidayForm branches={branches} />
               </CardContent>
             </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <DataTable columns={HolidayColumns} data={holiday} />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="weekendRules">
@@ -279,9 +299,14 @@ async function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6">
-                <WeekendRulesForm />
+                <WeekendRuleForm branches={branches} />
               </CardContent>
             </Card>
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <DataTable columns={WeekendRuleColumns} data={weekendRule} />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="workSchedule">
@@ -293,10 +318,15 @@ async function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-6">
-                <WorkScheduleForm />
+                <ShiftForm />
               </CardContent>
             </Card>
-          </TabsContent> */}
+            <div className="mt-2">
+              <div className="flex flex-col bg-secondary p-2 rounded-xl space-y-4">
+                <DataTable columns={ShiftColumns} data={shifts} />
+              </div>
+            </div>
+          </TabsContent>
 
           <TabsContent value="password">
             <Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteGeoFenceAction } from "@/actions/geofence.actions";
+import { deleteHolidayAction } from "@/actions/holiday.action";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,18 +16,17 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 
-export type GeoFenceType = {
+export type HolidayType = {
   id: string;
-  branchId: string;
-  branch: { name: string };
-  latitude: number;
-  longitude: number;
-  radiusM: number;
+  branchId: string | null;
+  branch: { name: string } | null;
+  title: string;
+  date: Date;
   createdBy?: string;
   action?: string;
 };
 
-export const GeoFenceColumns: ColumnDef<GeoFenceType>[] = [
+export const HolidayColumns: ColumnDef<HolidayType>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -58,28 +57,33 @@ export const GeoFenceColumns: ColumnDef<GeoFenceType>[] = [
     header: "Branch Name",
   },
   {
-    accessorKey: "latitude",
-    header: "Latitude",
+    accessorKey: "title",
+    header: "Name",
   },
   {
-    accessorKey: "longitude",
-    header: "Longitude",
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => {
+      const date = new Date(row.original.date);
+      return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }); // DD/MM/YYYY
+    },
   },
-  {
-    accessorKey: "radiusM",
-    header: "Radius in Meters",
-  },
+
   {
     accessorKey: "action",
     header: "Actions",
     cell: ({ row }) => {
-      const geoFence = row.original;
+      const holiday = row.original;
       return (
         <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => console.log("View", geoFence.id)}
+            onClick={() => console.log("View", holiday.id)}
           >
             View
           </Button>
@@ -92,10 +96,10 @@ export const GeoFenceColumns: ColumnDef<GeoFenceType>[] = [
 
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete Geo Fence?</AlertDialogTitle>
+                <AlertDialogTitle>Delete Holiday?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. The geo fence will be
-                  permanently removed.
+                  This action cannot be undone. The holiday will be permanently
+                  removed.
                 </AlertDialogDescription>
               </AlertDialogHeader>
 
@@ -104,7 +108,7 @@ export const GeoFenceColumns: ColumnDef<GeoFenceType>[] = [
 
                 <AlertDialogAction
                   className="bg-destructive hover:bg-destructive text-white"
-                  onClick={() => deleteGeoFenceAction(String(geoFence.id))}
+                  onClick={() => deleteHolidayAction(String(holiday.id))}
                 >
                   Delete
                 </AlertDialogAction>

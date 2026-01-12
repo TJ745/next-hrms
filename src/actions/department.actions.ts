@@ -22,39 +22,35 @@ export async function createDepartmentAction(formData: FormData) {
     throw new Error("Name and Branch are required");
   }
 
-
   try {
-       // 🔹 Check that the branch exists
-        const branch = await prisma.branch.findFirst({
-    where: { id: branchId, companyId: userCompanyId },
-  });
-       if (!branch) {
-    throw new Error("Invalid branch — does not belong to your company");
-  }
-  
-      // 🏢 Create company linked to admin
-      const department = await prisma.department.create({
-        data: {
-      name,
-      branchId,
-         
-        },
-        
-      });
-      
-  
-      return { success: true, return: department };
-    } catch (err) {
-      console.error(err);
-      return { error: "Failed to create department" };
+    // 🔹 Check that the branch exists
+    const branch = await prisma.branch.findFirst({
+      where: { id: branchId, companyId: userCompanyId },
+    });
+    if (!branch) {
+      throw new Error("Invalid branch — does not belong to your company");
     }
+
+    // 🏢 Create company linked to admin
+    const department = await prisma.department.create({
+      data: {
+        name,
+        branchId,
+      },
+    });
+
+    return { success: true, return: department };
+  } catch (err) {
+    console.error(err);
+    return { error: "Failed to create department" };
+  }
 }
 
 export async function getDepartmentsAction() {
   return await prisma.department.findMany({
-    include:{
-      branch:true
-    }
+    include: {
+      branch: true,
+    },
   });
 }
 
@@ -64,4 +60,11 @@ export async function updateDepartmentAction(id: string, data: any) {
 
 export async function deleteDepartmentAction(id: string) {
   return await prisma.department.delete({ where: { id } });
+}
+
+export async function getDepartmentEmployees(departmentId: string) {
+  return prisma.employee.findMany({
+    where: { departmentId },
+    include: { user: true, shift: true },
+  });
 }

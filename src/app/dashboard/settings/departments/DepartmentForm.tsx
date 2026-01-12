@@ -19,7 +19,6 @@ import {
 
 export default function DepartmentForm({ branches }: any) {
   const [isPending, setIsPending] = useState(false);
-  // const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState("");
 
   const router = useRouter();
@@ -27,7 +26,6 @@ export default function DepartmentForm({ branches }: any) {
   useEffect(() => {
     async function loadBranches() {
       const data = await getBranchesAction();
-      // setBranches(data);
     }
     loadBranches();
   }, []);
@@ -43,11 +41,11 @@ export default function DepartmentForm({ branches }: any) {
 
     if (error) {
       toast.error(error);
-      setIsPending(false);
     } else {
       toast.success("Department registered successfully.");
       router.refresh();
     }
+    setIsPending(false);
   }
 
   return (

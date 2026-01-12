@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { createBranchAction } from "@/actions/branch.actions";
-import { Label } from "@/components/ui/label";
 
-export default function BranchForm() {
+export default function BranchForm({ branches }: { branches: any[] }) {
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
@@ -22,11 +22,11 @@ export default function BranchForm() {
 
     if (error) {
       toast.error(error);
-      setIsPending(false);
     } else {
       toast.success("Branch registered successfully.");
       router.refresh();
     }
+    setIsPending(false);
   }
 
   return (

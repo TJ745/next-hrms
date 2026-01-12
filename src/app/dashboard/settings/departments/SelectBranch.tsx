@@ -36,6 +36,11 @@ async function SelectBranch() {
               {b.name}
             </SelectItem>
           ))}
+          {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((d) => (
+            <SelectItem key={d} value={d}>
+              {d}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>

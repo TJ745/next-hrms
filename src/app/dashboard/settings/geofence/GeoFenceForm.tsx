@@ -1,15 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {
-  createBranchAction,
-  getBranchesAction,
-} from "@/actions/branch.actions";
-import { Label } from "@/components/ui/label";
+import { getBranchesAction } from "@/actions/branch.actions";
 import {
   Select,
   SelectContent,
@@ -29,7 +26,6 @@ export default function GeoFenceForm({ branches }: any) {
   useEffect(() => {
     async function loadBranches() {
       const data = await getBranchesAction();
-      // setBranches(data);
     }
     loadBranches();
   }, []);
@@ -40,15 +36,16 @@ export default function GeoFenceForm({ branches }: any) {
     setIsPending(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
+    formData.append("branchId", branchId);
     const { error } = await createGeoFenceAction(formData);
 
     if (error) {
       toast.error(error);
-      setIsPending(false);
     } else {
       toast.success("Geo Fence registered successfully.");
       router.refresh();
     }
+    setIsPending(false);
   }
 
   return (
@@ -58,6 +55,7 @@ export default function GeoFenceForm({ branches }: any) {
         type="number"
         name="latitude"
         placeholder="Latitude"
+        step="0.000001"
         className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
       <Label>Longitude</Label>
@@ -65,6 +63,7 @@ export default function GeoFenceForm({ branches }: any) {
         type="number"
         name="longitude"
         placeholder="Longitude"
+        step="0.000001"
         className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       />
       <Label>Radius in Meters</Label>
