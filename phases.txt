@@ -55,41 +55,25 @@ Create an employee + link to user + department + shift
 
 
 PHASE 3: Employee Module
-
-CRUD Employee (Admin/HR)
-
+CRUD Employee (Admin/HR) ✅
 Assign:
-
-Department
-
-Shift
-
+Department ✅
+Shift ✅
 Manager
-
 SalaryHistory
-
 Documents
-
 Upload documents (file → cloud storage like S3 / Vercel Blob)
-
 Show employee profile (include documents, salary history, manager, team)
 
 
 
 PHASE 4: Attendance & Geo-Fencing
-
 Employee check-in/out:
-
 Capture lat/lng
-
 Validate against branch GeoFence
-
 Apply shift start/end + grace minutes
-
 Apply weekend & holiday rules
-
 Attendance dashboard:
-
 Stats per employee, branch, department
 
 

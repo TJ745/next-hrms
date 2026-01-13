@@ -8,6 +8,7 @@ import { sendEmailAction } from "./send-email.action";
 import { randomBytes } from "crypto";
 import fs from "fs/promises";
 import path from "path";
+import { JobTitle } from "@/generated/prisma";
 
 export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
   include: {
@@ -218,7 +219,7 @@ export async function updateEmployeeAction(formData: FormData) {
       "otherAllowance",
     ];
 
-    const relationalFields = ["jobTitle", "department", "manager", "shift"];
+    const relationalFields = ["department", "manager", "shift"];
 
     const employeeFields = [
       "empId",

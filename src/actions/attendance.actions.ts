@@ -120,10 +120,13 @@ export async function checkInAction({
     throw new Error("Cannot check-in on weekend/holiday");
   }
 
+  const latNum = Number(lat);
+  const lngNum = Number(lng);
+
   if (
-    lat == null ||
-    lng == null ||
-    !checkGeoFence(lat, lng, branch.geoFences)
+    isNaN(latNum) ||
+    isNaN(lngNum) ||
+    !checkGeoFence(latNum, lngNum, branch.geoFences)
   ) {
     throw new Error("Outside required");
   }
@@ -233,9 +236,21 @@ export async function checkOutAction() {
 /* ------------------------------ MONTH SUMMARY ------------------------------ */
 export async function getMonthlyAttendanceSummaryAction(
   month: number,
-  year: number
+  year: number,
+  employeeId?: string
 ) {
-  const employee = await getEmployeeFromSession();
+  month = Number(month);
+  year = Number(year);
+  if (!month || !year) throw new Error("Invalid month or year");
+
+  let employee;
+  if (employeeId) {
+    employee = await prisma.employee.findUnique({ where: { id: employeeId } });
+  } else {
+    employee = await getEmployeeFromSession();
+  }
+
+  if (!employee) throw new Error("Employee not found");
 
   const start = new Date(year, month - 1, 1);
   const end = new Date(year, month, 0, 23, 59, 59);
@@ -254,6 +269,7 @@ export async function getMonthlyAttendanceSummaryAction(
     absents: records.filter((r) => r.status === "ABSENT").length,
     workedMinutes: records.reduce((a, b) => a + (b.workedMinutes ?? 0), 0),
     overtimeMinutes: records.reduce((a, b) => a + (b.overtimeMinutes ?? 0), 0),
+    records,
   };
 }
 

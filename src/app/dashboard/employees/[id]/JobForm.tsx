@@ -1,5 +1,7 @@
 "use client";
 import { updateEmployeeAction } from "@/actions/employee.actions";
+import { getJobTitleAction } from "@/actions/jobtitle.actions";
+import { getShiftsAction } from "@/actions/shift.action";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,7 +23,7 @@ import {
 } from "@/generated/prisma";
 import { Pencil, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type GeneralFormProps = {
@@ -38,6 +40,16 @@ function JobForm({ employee }: GeneralFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
+  const [jobTitles, setJobTitles] = useState<any[]>([]);
+  const [jobTitle, setJobTitle] = useState(employee.jobTitle || "");
+  const [workingHours, setWorkingHours] = useState<any[]>([]);
+  const [workingHour, setWorkingHour] = useState(employee.workingHours || "");
+  const [shiftId, setShiftId] = useState(employee.shiftId || "");
+
+  useEffect(() => {
+    getJobTitleAction().then(setJobTitles);
+    getShiftsAction().then(setWorkingHours);
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -58,40 +70,6 @@ function JobForm({ employee }: GeneralFormProps) {
       setIsEditing(false);
     }
   }
-
-  // const contractStartDate = employee.joinDate;
-
-  // const end = new Date(employee.joinDate || "");
-  // end.setFullYear(end.getFullYear() + Number(employee.contractValidity));
-  // const contractEndDate = end.toISOString().split("T")[0];
-
-  // const probEnd = new Date(employee.joinDate || "");
-  // probEnd.setMonth(probEnd.getMonth() + Number(employee.probationPeriod));
-  // const probationEndDate = probEnd.toISOString().split("T")[0];
-
-  // const joinDate = new Date(employee.joinDate || "");
-  // const today = new Date();
-
-  // let years = today.getFullYear() - joinDate.getFullYear();
-  // let months = today.getMonth() - joinDate.getMonth();
-  // let days = today.getDate() - joinDate.getDate();
-
-  // // Adjust days
-  // if (days < 0) {
-  //   months--;
-  //   const prevMonth = new Date(
-  //     today.getFullYear(),
-  //     today.getMonth(),
-  //     0
-  //   ).getDate();
-  //   days += prevMonth;
-  // }
-
-  // // Adjust months
-  // if (months < 0) {
-  //   years--;
-  //   months += 12;
-  // }
 
   function formatDate(date?: Date | null) {
     if (!date) return "-";
@@ -206,11 +184,25 @@ function JobForm({ employee }: GeneralFormProps) {
                   Job Title
                 </Label>
                 {isEditing ? (
-                  <Input
+                  <Select
                     name="jobTitle"
+                    value={jobTitle}
                     defaultValue={employee.jobTitle || ""}
-                    disabled={!isEditing}
-                  />
+                    onValueChange={setJobTitle}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Job Title" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {jobTitles.map((j: any) => (
+                          <SelectItem key={j.id} value={j.name}>
+                            {j.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
                     {employee.jobTitle || "-"}
@@ -232,7 +224,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Department
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {employee.user.department?.name}
+                  {employee.department?.name}
                 </span>
               </div>
 
@@ -241,7 +233,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Branch
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {employee.user.branch?.name}
+                  {employee.department.branch?.name}
                 </span>
               </div>
 
@@ -383,20 +375,21 @@ function JobForm({ employee }: GeneralFormProps) {
                 </Label>
                 {isEditing ? (
                   <Select
-                    name="workingHours"
+                    name="shift"
+                    value={shiftId}
                     defaultValue={employee.workingHours || ""}
+                    onValueChange={setShiftId}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select Working Hours" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value="07:00 am to 04:00 pm">
-                          07:00 am to 04:00 pm
-                        </SelectItem>
-                        <SelectItem value="08:30 am to 06:00 pm">
-                          08:30 am to 06:00 pm
-                        </SelectItem>
+                        {workingHours.map((s: any) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>

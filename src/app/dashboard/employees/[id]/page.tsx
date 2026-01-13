@@ -82,11 +82,11 @@ export default async function page({ params }: { params: { id: string } }) {
                   </p>
                   <Badge
                     variant={
-                      employee.status === "Active" ? "success" : "destructive"
+                      employee.status === "ACTIVE" ? "success" : "destructive"
                     }
                     className="px-2 py-1"
                   >
-                    {employee.status === "Active" ? "Active" : "Inactive"}
+                    {employee.status === "ACTIVE" ? "Active" : "Inactive"}
                   </Badge>
                   <hr />
                   <div className="flex flex-col items-start gap-2">
@@ -109,14 +109,12 @@ export default async function page({ params }: { params: { id: string } }) {
                     <p className="w-12 text-xs text-gray-400 gap-2">
                       Department
                     </p>
-                    <span className="text-sm">
-                      {employee.user.department?.name}
-                    </span>
+                    <span className="text-sm">{employee.department.name}</span>
                     <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
                       Branch
                     </p>
                     <span className="text-sm">
-                      {employee.user.branch?.name}
+                      {employee.department.branch.name}
                     </span>
                     <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
                       Manager

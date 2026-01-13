@@ -144,11 +144,17 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                   Gender
                 </Label>
                 {isEditingPersonal ? (
-                  <Input
-                    name="gender"
-                    defaultValue={employee.gender || ""}
-                    disabled={!isEditingPersonal}
-                  />
+                  <Select name="gender" defaultValue={employee.gender || ""}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Male">Male</SelectItem>
+                        <SelectItem value="Female">Female</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
                     {employee.gender || "-"}
@@ -198,11 +204,22 @@ function GeneralFrom({ employee }: GeneralFormProps) {
                   Marital Status
                 </Label>
                 {isEditingPersonal ? (
-                  <Input
+                  <Select
                     name="maritalStatus"
                     defaultValue={employee.maritalStatus || ""}
-                    disabled={!isEditingPersonal}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Marital Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="Single">Single</SelectItem>
+                        <SelectItem value="Married">Married</SelectItem>
+                        <SelectItem value="Divorced">Divorced</SelectItem>
+                        <SelectItem value="Widowed">Widowed</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
                     {employee.maritalStatus || "-"}
