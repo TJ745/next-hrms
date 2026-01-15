@@ -55,6 +55,11 @@ export enum DocumentType {
   CONTRACT = "CONTRACT",
   CERTIFICATE = "CERTIFICATE",
   OTHER = "OTHER",
+  IQAMA = "IQAMA",
+  CV = "CV",
+  HIGH_SCHOOL_CERTIFICATE = "High School Certificate",
+  UNIVERSITY_CERTIFICATE = "University Certificate",
+  OTHER_CERTIFICATE = "Other Certificate",
 }
 
 export enum NotificationType {

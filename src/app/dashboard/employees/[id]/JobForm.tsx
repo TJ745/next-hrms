@@ -14,13 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Branch,
-  Company,
-  Department,
-  Employee,
-  User,
-} from "@/generated/prisma";
+import { Branch, Company, Department, Employee, User } from "@prisma/client";
 import { Pencil, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -131,6 +125,7 @@ function JobForm({ employee }: GeneralFormProps) {
             {isEditing ? (
               <div className="flex gap-2">
                 <Button
+                  type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsEditing(false)}
@@ -187,7 +182,6 @@ function JobForm({ employee }: GeneralFormProps) {
                   <Select
                     name="jobTitle"
                     value={jobTitle}
-                    defaultValue={employee.jobTitle || ""}
                     onValueChange={setJobTitle}
                   >
                     <SelectTrigger>
@@ -233,7 +227,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   Branch
                 </Label>
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {employee.department.branch?.name}
+                  {employee.department?.branch?.name}
                 </span>
               </div>
 
@@ -375,9 +369,8 @@ function JobForm({ employee }: GeneralFormProps) {
                 </Label>
                 {isEditing ? (
                   <Select
-                    name="shift"
+                    name="shiftId"
                     value={shiftId}
-                    defaultValue={employee.workingHours || ""}
                     onValueChange={setShiftId}
                   >
                     <SelectTrigger>

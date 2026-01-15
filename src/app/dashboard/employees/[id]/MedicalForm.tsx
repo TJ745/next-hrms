@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Employee, User } from "@/generated/prisma";
+import { Employee, User } from "@prisma/client";
 import { Pencil, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";

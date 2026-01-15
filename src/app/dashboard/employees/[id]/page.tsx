@@ -67,7 +67,7 @@ export default async function page({ params }: { params: { id: string } }) {
             <div className="col-span-1 bg-primary-foreground rounded-xl">
               <Card className="flex flex-col items-center text-center shadow-sm transition hover:shadow-md h-full">
                 <Image
-                  src={`${employee.image}`}
+                  src={employee.image || "/avatar.png"}
                   alt="Employee Image"
                   width={100}
                   height={100}
@@ -119,7 +119,9 @@ export default async function page({ params }: { params: { id: string } }) {
                     <p className="text-xs text-gray-400 flex items-center justify-center gap-2">
                       Manager
                     </p>
-                    <span className="text-sm">{"N/A"}</span>
+                    <span className="text-sm">
+                      {employee.manager?.user.name || "N/A"}
+                    </span>
                   </div>
                   <EmpImage employeeId={employee.id} />
                 </CardContent>

@@ -8,7 +8,8 @@ import { sendEmailAction } from "./send-email.action";
 import { randomBytes } from "crypto";
 import fs from "fs/promises";
 import path from "path";
-import { JobTitle } from "@/generated/prisma";
+import { DocumentType } from "@prisma/client";
+// import { writeFile, removeFile } from "@vercel/blob";
 
 export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
   include: {
@@ -289,6 +290,41 @@ export async function updateEmployeeAction(formData: FormData) {
     }
 
     // -----------------------------
+    // SALARY HISTORY LOGIC
+    // -----------------------------
+    const updateData: any = {};
+    formData.forEach((v, k) => {
+      if (v) updateData[k] = v;
+    });
+
+    // Save SalaryHistory if basicSalary or allowances changed
+    if (
+      updateData.basicSalary ||
+      updateData.housingAllowance ||
+      updateData.transportationAllowance
+    ) {
+      await prisma.salaryHistory.create({
+        data: {
+          employeeId,
+          basicSalary: Number(updateData.basicSalary) || 0,
+          housingAllowance: Number(updateData.housingAllowance) || 0,
+          transportationAllowance:
+            Number(updateData.transportationAllowance) || 0,
+          foodAllowance: Number(updateData.foodAllowance) || 0,
+          mobileAllowance: Number(updateData.mobileAllowance) || 0,
+          otherAllowance: Number(updateData.otherAllowance) || 0,
+          totalSalary:
+            (Number(updateData.basicSalary) || 0) +
+            (Number(updateData.housingAllowance) || 0) +
+            (Number(updateData.transportationAllowance) || 0) +
+            (Number(updateData.foodAllowance) || 0) +
+            (Number(updateData.mobileAllowance) || 0) +
+            (Number(updateData.otherAllowance) || 0),
+        },
+      });
+    }
+
+    // -----------------------------
     // Execute update
     // -----------------------------
     const updated = await prisma.employee.update({
@@ -298,6 +334,7 @@ export async function updateEmployeeAction(formData: FormData) {
         user: Object.keys(userUpdate).length
           ? { update: userUpdate }
           : undefined,
+        updateData,
       },
       include: {
         user: true,
@@ -399,4 +436,153 @@ export async function updateEmpImageAction(formData: FormData) {
   });
 
   return { success: true };
+}
+
+// Employees Documents upload action
+// export async function uploadEmployeeDocumentAction(formData: FormData) {
+//   const session = await auth.api.getSession({ headers: await headers() });
+//   if (!session || !["ADMIN", "HR"].includes(session.user.role))
+//     return { error: "Unauthorized" };
+
+//   const employeeId = String(formData.get("employeeId"));
+//   const type = String(formData.get("type"));
+//   const expiryDate = formData.get("expiryDate")
+//     ? new Date(String(formData.get("expiryDate")))
+//     : null;
+
+//   const file = formData.get("file") as File;
+//   if (!file || !employeeId || !type) return { error: "Missing data" };
+
+//   const blob = await put(
+//     `employees/${employeeId}/${Date.now()}-${file.name}`,
+//     file,
+//     { access: "public" }
+//   );
+
+//   await prisma.employeeDocument.create({
+//     data: {
+//       employeeId,
+//       type: type as any,
+//       fileName: file.name,
+//       fileUrl: blob.url,
+//       expiryDate,
+//     },
+//   });
+
+//   return { success: true };
+// }
+
+// Delete employee document action
+
+// export async function deleteEmployeeDocumentAction(id: string) {
+//   const session = await auth.api.getSession({ headers: await headers() });
+//   if (!session || session.user.role !== "ADMIN")
+//     return { error: "Unauthorized" };
+
+//   await prisma.employeeDocument.delete({ where: { id } });
+//   return { success: true };
+// }
+
+// export async function uploadEmployeeDocumentAction({
+//   employeeId,
+//   type,
+//   file,
+// }: {
+//   employeeId: string;
+//   type: string;
+//   file: File;
+// }) {
+//   // Upload to Vercel Blob
+//   const filePath = `employees/${employeeId}/${type}-${Date.now()}-${file.name}`;
+//   const fileBuffer = Buffer.from(await file.arrayBuffer());
+//   const url = await writeFile(filePath, fileBuffer, { contentType: file.type });
+
+//   // Save record in DB
+//   const doc = await prisma.employeeDocument.create({
+//     data: {
+//       employeeId,
+//       type,
+//       url,
+//       fileName: file.name,
+//     },
+//   });
+
+//   return doc;
+// }
+
+// export async function deleteEmployeeDocumentAction(documentId: string) {
+//   const doc = await prisma.employeeDocument.findUnique({
+//     where: { id: documentId },
+//   });
+//   if (!doc) throw new Error("Document not found");
+
+//   await removeFile(doc.url); // delete from blob
+//   await prisma.employeeDocument.delete({ where: { id: documentId } });
+//   return true;
+// }
+
+// export async function getEmployeeDocumentsAction(employeeId: string) {
+//   return prisma.employeeDocument.findMany({ where: { employeeId } });
+// }
+
+export async function uploadEmployeeDocumentAction(
+  employeeId: string,
+  type: DocumentType,
+  file: File
+) {
+  try {
+    if (!file) throw new Error("No file provided");
+
+    // Make folder for this employee if not exists
+    const employeeFolder = path.join(
+      process.cwd(),
+      "public",
+      "documents",
+      employeeId
+    );
+    await fs.mkdir(employeeFolder, { recursive: true });
+
+    // Create unique file name
+    const timestamp = Date.now();
+    const safeFileName = file.name.replace(/\s+/g, "_");
+    const fileName = `${type}-${timestamp}-${safeFileName}`;
+
+    // File path
+    const filePath = path.join(employeeFolder, fileName);
+
+    // Save file to disk
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await fs.writeFile(filePath, buffer);
+
+    // Save in DB
+    const doc = await prisma.employeeDocument.create({
+      data: {
+        employeeId,
+        type,
+        fileName,
+        fileUrl: `/documents/${employeeId}/${fileName}`, // required
+      },
+    });
+
+    return { doc };
+  } catch (error: any) {
+    return { error: error.message || "Upload failed" };
+  }
+}
+
+export async function deleteEmployeeDocumentAction(id: string) {
+  const doc = await prisma.employeeDocument.findUnique({
+    where: { id },
+  });
+  if (!doc) throw new Error("Document not found");
+
+  const filePath = path.join(process.cwd(), "public", doc.fileUrl);
+  await fs.unlink(filePath).catch(() => {}); // ignore if missing
+
+  await prisma.employeeDocument.delete({ where: { id } });
+  return true;
+}
+
+export async function getEmployeeDocumentsAction(employeeId: string) {
+  return prisma.employeeDocument.findMany({ where: { employeeId } });
 }

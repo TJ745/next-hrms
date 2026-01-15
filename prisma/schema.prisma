@@ -439,12 +439,25 @@ enum WeekDay {
   SUN
 }
 
+// enum DocumentType {
+//   ID
+//   PASSPORT
+//   CONTRACT
+//   CERTIFICATE
+//   OTHER
+// }
+
 enum DocumentType {
   ID
+  IQAMA
   PASSPORT
   CONTRACT
   CERTIFICATE
   OTHER
+  CV
+  HIGH_SCHOOL_CERTIFICATE
+  UNIVERSITY_CERTIFICATE
+  OTHER_CERTIFICATE
 }
 
 enum NotificationType {

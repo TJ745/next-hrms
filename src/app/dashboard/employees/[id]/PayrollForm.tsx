@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Employee, User } from "@/generated/prisma";
+import { Employee, User } from "@prisma/client";
 import { Pencil, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import SalaryHistoryTimeline from "./SalaryHistory";
 
 type GeneralFormProps = {
   employee: Employee & { user: User };
@@ -294,7 +295,35 @@ function PayrollForm({ employee }: GeneralFormProps) {
             </div>
           </CardContent>
         </form>
+        <form
+          // action={(fd) => startTransition(() => addSalaryHistoryAction(fd))}
+          className="space-y-4"
+        >
+          <Input type="hidden" name="employeeId" value={employee.id} />
+
+          <Input
+            name="salary"
+            type="number"
+            placeholder="New Salary"
+            required
+          />
+          <Input name="effectiveFrom" type="date" required />
+          <Input name="reason" placeholder="Reason (optional)" />
+
+          <Button>Update Salary</Button>
+
+          {/* Salary history */}
+          <div className="mt-4">
+            {employee.salaryHistory.map((s: any) => (
+              <div key={s.id}>
+                {s.salary} — {new Date(s.effectiveFrom).toDateString()}
+              </div>
+            ))}
+          </div>
+        </form>
       </Card>
+
+      <SalaryHistoryTimeline history={employee.salaryHistory} />
     </div>
   );
 }
