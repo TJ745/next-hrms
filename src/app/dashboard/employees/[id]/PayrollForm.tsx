@@ -1,26 +1,31 @@
 "use client";
-import { updateEmployeeAction } from "@/actions/employee.actions";
+
+import { addSalaryHistoryAction } from "@/actions/salaryhistory.action";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Employee, User } from "@prisma/client";
-import { Pencil, Save, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { Employee, SalaryHistory } from "@prisma/client";
+import { useState } from "react";
 import { toast } from "sonner";
-import SalaryHistoryTimeline from "./SalaryHistory";
+import { useRouter } from "next/navigation";
+import { Pencil, Save, X } from "lucide-react";
 
-type GeneralFormProps = {
-  employee: Employee & { user: User };
+type Props = {
+  employee: Employee & { salaryHistory: SalaryHistory[] };
 };
 
-function PayrollForm({ employee }: GeneralFormProps) {
+export default function PayrollForm({ employee }: Props) {
   const [isEditingBank, setIsEditingBank] = useState(false);
   const [isEditingSalary, setIsEditingSalary] = useState(false);
 
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
+
+  const currentSalary = employee.salaryHistory[0]; // latest
+  const effectiveDate = currentSalary?.effectiveFrom
+    ? new Date(currentSalary.effectiveFrom).toISOString().split("T")[0]
+    : "";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,7 +33,7 @@ function PayrollForm({ employee }: GeneralFormProps) {
     setIsPending(true);
 
     const formData = new FormData(e.target as HTMLFormElement);
-    const { error } = await updateEmployeeAction(formData);
+    const { error } = await addSalaryHistoryAction(formData);
 
     if (error) {
       toast.error(error);
@@ -42,15 +47,6 @@ function PayrollForm({ employee }: GeneralFormProps) {
       setIsEditingSalary(false);
     }
   }
-
-  const totalSalary =
-    Number(employee.basicSalary || 0) +
-    Number(employee.housingAllowance || 0) +
-    Number(employee.transportationAllowance || 0) +
-    Number(employee.foodAllowance || 0) +
-    Number(employee.mobileAllowance || 0) +
-    Number(employee.otherAllowance || 0);
-
   return (
     <div>
       <Card className="mt-4">
@@ -145,7 +141,7 @@ function PayrollForm({ employee }: GeneralFormProps) {
       </Card>
 
       <Card className="mt-4">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <CardHeader className="flex items-center justify-between h-2">
             <CardTitle>Salary Info</CardTitle>
             {isEditingSalary ? (
@@ -176,11 +172,13 @@ function PayrollForm({ employee }: GeneralFormProps) {
               </Button>
             )}
           </CardHeader>
-          <br />
           <hr />
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 gap-x-8 mt-2">
-              <Input type="hidden" name="employeeId" value={employee.id} />
+
+          <CardContent className="space-y-6">
+            {/* Add Salary */}
+            <Input type="hidden" name="employeeId" value={employee.id} />
+
+            <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Basic Salary
@@ -188,16 +186,17 @@ function PayrollForm({ employee }: GeneralFormProps) {
                 {isEditingSalary ? (
                   <Input
                     name="basicSalary"
-                    defaultValue={employee.basicSalary || ""}
+                    defaultValue={currentSalary.basicSalary || ""}
                     disabled={!isEditingSalary}
+                    type="number"
+                    required
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.basicSalary || "-"}
+                    {currentSalary.basicSalary || "-"}
                   </span>
                 )}
               </div>
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Housing Allowance
@@ -205,16 +204,16 @@ function PayrollForm({ employee }: GeneralFormProps) {
                 {isEditingSalary ? (
                   <Input
                     name="housingAllowance"
-                    defaultValue={employee.housingAllowance || ""}
+                    defaultValue={currentSalary.housingAllowance || ""}
                     disabled={!isEditingSalary}
+                    type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.housingAllowance || "-"}
+                    {currentSalary.housingAllowance || "-"}
                   </span>
                 )}
               </div>
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Transportation Allowance
@@ -222,16 +221,16 @@ function PayrollForm({ employee }: GeneralFormProps) {
                 {isEditingSalary ? (
                   <Input
                     name="transportationAllowance"
-                    defaultValue={employee.transportationAllowance || ""}
+                    defaultValue={currentSalary.transportationAllowance || ""}
                     disabled={!isEditingSalary}
+                    type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.transportationAllowance || "-"}
+                    {currentSalary.transportationAllowance || "-"}
                   </span>
                 )}
               </div>
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Food Allowance
@@ -239,16 +238,16 @@ function PayrollForm({ employee }: GeneralFormProps) {
                 {isEditingSalary ? (
                   <Input
                     name="foodAllowance"
-                    defaultValue={employee.foodAllowance || ""}
+                    defaultValue={currentSalary.foodAllowance || ""}
                     disabled={!isEditingSalary}
+                    type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.foodAllowance || "-"}
+                    {currentSalary.foodAllowance || "-"}
                   </span>
                 )}
               </div>
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Mobile Allowance
@@ -256,16 +255,16 @@ function PayrollForm({ employee }: GeneralFormProps) {
                 {isEditingSalary ? (
                   <Input
                     name="mobileAllowance"
-                    defaultValue={employee.mobileAllowance || ""}
+                    defaultValue={currentSalary.mobileAllowance || ""}
                     disabled={!isEditingSalary}
+                    type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.mobileAllowance || "-"}
+                    {currentSalary.mobileAllowance || "-"}
                   </span>
                 )}
               </div>
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Other Allowance
@@ -273,59 +272,67 @@ function PayrollForm({ employee }: GeneralFormProps) {
                 {isEditingSalary ? (
                   <Input
                     name="otherAllowance"
-                    defaultValue={employee.otherAllowance || ""}
+                    defaultValue={currentSalary.otherAllowance || ""}
                     disabled={!isEditingSalary}
+                    type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.otherAllowance || "-"}
+                    {currentSalary.otherAllowance || "-"}
                   </span>
                 )}
               </div>
-
               <div className="flex items-center ">
                 <Label className="w-[140px] text-muted-foreground">
                   Total Salary
                 </Label>
 
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {totalSalary || "-"}
+                  {currentSalary.totalSalary || "-"}
                 </span>
               </div>
             </div>
+
+            <div className="flex items-center ">
+              <Label className="w-[140px] text-muted-foreground">
+                Effective Date
+              </Label>
+              {isEditingSalary ? (
+                <Input
+                  name="effectiveFrom"
+                  defaultValue={effectiveDate || ""}
+                  disabled={!isEditingSalary}
+                  type="date"
+                  required
+                />
+              ) : (
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {effectiveDate || "-"}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center ">
+              <Label className="w-[140px] text-muted-foreground">
+                Reason for Salary Change
+              </Label>
+              {isEditingSalary ? (
+                <Input
+                  name="reason"
+                  defaultValue={currentSalary.reason || ""}
+                  disabled={!isEditingSalary}
+                  type="text"
+                  required
+                />
+              ) : (
+                <span className="text-sm text-right text-foreground font-medium truncate">
+                  {currentSalary.reason || "-"}
+                </span>
+              )}
+            </div>
           </CardContent>
         </form>
-        <form
-          // action={(fd) => startTransition(() => addSalaryHistoryAction(fd))}
-          className="space-y-4"
-        >
-          <Input type="hidden" name="employeeId" value={employee.id} />
-
-          <Input
-            name="salary"
-            type="number"
-            placeholder="New Salary"
-            required
-          />
-          <Input name="effectiveFrom" type="date" required />
-          <Input name="reason" placeholder="Reason (optional)" />
-
-          <Button>Update Salary</Button>
-
-          {/* Salary history */}
-          <div className="mt-4">
-            {employee.salaryHistory.map((s: any) => (
-              <div key={s.id}>
-                {s.salary} — {new Date(s.effectiveFrom).toDateString()}
-              </div>
-            ))}
-          </div>
-        </form>
       </Card>
-
-      <SalaryHistoryTimeline history={employee.salaryHistory} />
     </div>
   );
 }
-
-export default PayrollForm;

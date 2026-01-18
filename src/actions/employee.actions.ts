@@ -1,15 +1,13 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, DocumentType } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { sendEmailAction } from "./send-email.action";
 import { randomBytes } from "crypto";
 import fs from "fs/promises";
 import path from "path";
-import { DocumentType } from "@prisma/client";
-// import { writeFile, removeFile } from "@vercel/blob";
 
 export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
   include: {
@@ -43,7 +41,9 @@ export type EmployeeWithUser = Prisma.EmployeeGetPayload<{
     leaves: true;
     overtimes: true;
     payrolls: true;
-    salaryHistory: true;
+    salaryHistory: {
+      orderBy: { effectiveFrom: "desc" }; // IMPORTANT
+    };
     team: true;
   };
 }>;
@@ -157,7 +157,9 @@ export async function getEmployeeAction(
       leaves: true,
       overtimes: true,
       payrolls: true,
-      salaryHistory: true,
+      salaryHistory: {
+        orderBy: { effectiveFrom: "desc" }, // IMPORTANT
+      },
       team: true,
     },
   });
@@ -179,7 +181,9 @@ export async function getEmployeesAction(): Promise<EmployeeWithUser[]> {
       leaves: true,
       overtimes: true,
       payrolls: true,
-      salaryHistory: true,
+      salaryHistory: {
+        orderBy: { effectiveFrom: "desc" }, // IMPORTANT
+      },
       team: true,
     },
     orderBy: {

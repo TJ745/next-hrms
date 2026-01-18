@@ -18,6 +18,7 @@ import { getEmployeeAction } from "@/actions/employee.actions";
 import EmpImage from "./EmpImage";
 import Image from "next/image";
 import MedicalForm from "./MedicalForm";
+import SalaryHistoryForm from "./SalaryHistoryForm";
 
 export default async function page({ params }: { params: { id: string } }) {
   const { id } = await params;
@@ -133,6 +134,7 @@ export default async function page({ params }: { params: { id: string } }) {
                   <TabsTrigger value="general">General</TabsTrigger>
                   <TabsTrigger value="job">Job</TabsTrigger>
                   <TabsTrigger value="payroll">Payroll</TabsTrigger>
+                  <TabsTrigger value="salary">Salary History</TabsTrigger>
                   <TabsTrigger value="medical">Medical</TabsTrigger>
                   <TabsTrigger value="documents">Documents</TabsTrigger>
                 </TabsList>
@@ -147,6 +149,10 @@ export default async function page({ params }: { params: { id: string } }) {
 
                 <TabsContent value="payroll">
                   <PayrollForm employee={employee} />
+                </TabsContent>
+
+                <TabsContent value="salary">
+                  <SalaryHistoryForm employee={employee} />
                 </TabsContent>
 
                 <TabsContent value="medical">

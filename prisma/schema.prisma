@@ -318,12 +318,18 @@ model Payroll {
 }
 
 model SalaryHistory {
-  id            String   @id @default(cuid())
-  employeeId    String
-  salary        Float
-  effectiveFrom DateTime
-  reason        String?
-  employee      Employee @relation(fields: [employeeId], references: [id])
+  id                      String   @id @default(cuid())
+  employeeId              String
+  basicSalary             Float
+  transportationAllowance Float
+  housingAllowance        Float
+  mobileAllowance         Float
+  foodAllowance           Float
+  otherAllowance          Float
+  totalSalary             Float
+  effectiveFrom           DateTime
+  reason                  String?
+  employee                Employee @relation(fields: [employeeId], references: [id])
 }
 
 model Asset {

@@ -1,3 +1,62 @@
+// "use client";
+
+// import { SalaryHistory } from "@prisma/client";
+// import { format } from "date-fns";
+
+// type Props = {
+//   history: SalaryHistory[];
+// };
+
+// export default function SalaryHistoryTimeline({ history }: Props) {
+//   if (!history.length)
+//     return (
+//       <p className="text-sm text-muted-foreground">No salary history found.</p>
+//     );
+
+//   const sorted = [...history].sort(
+//     (a, b) =>
+//       new Date(b.effectiveFrom).getTime() - new Date(a.effectiveFrom).getTime()
+//   );
+
+//   return (
+//     <div className="relative border-l pl-6 space-y-6">
+//       {sorted.map((item, index) => (
+//         <div key={item.id} className="relative">
+//           {/* Dot */}
+//           <span
+//             className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full ${
+//               index === 0 ? "bg-green-600" : "bg-gray-400"
+//             }`}
+//           />
+
+//           <div className="rounded-lg border p-4 bg-background shadow-sm">
+//             <div className="flex justify-between items-center">
+//               <h4 className="font-semibold text-lg">
+//                 {item.salary.toLocaleString()} SAR
+//               </h4>
+//               <span className="text-xs text-muted-foreground">
+//                 {format(new Date(item.effectiveFrom), "dd MMM yyyy")}
+//               </span>
+//             </div>
+
+//             {item.reason && (
+//               <p className="mt-2 text-sm text-muted-foreground">
+//                 {item.reason}
+//               </p>
+//             )}
+
+//             {index === 0 && (
+//               <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-green-100 text-green-700">
+//                 Current Salary
+//               </span>
+//             )}
+//           </div>
+//         </div>
+//       ))}
+//     </div>
+//   );
+// }
+
 "use client";
 
 import { SalaryHistory } from "@prisma/client";
@@ -9,9 +68,7 @@ type Props = {
 
 export default function SalaryHistoryTimeline({ history }: Props) {
   if (!history.length)
-    return (
-      <p className="text-sm text-muted-foreground">No salary history found.</p>
-    );
+    return <p className="text-sm text-muted-foreground">No salary history.</p>;
 
   const sorted = [...history].sort(
     (a, b) =>
@@ -20,34 +77,40 @@ export default function SalaryHistoryTimeline({ history }: Props) {
 
   return (
     <div className="relative border-l pl-6 space-y-6">
-      {sorted.map((item, index) => (
-        <div key={item.id} className="relative">
-          {/* Dot */}
+      {sorted.map((s, i) => (
+        <div key={s.id} className="relative">
           <span
-            className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full ${
-              index === 0 ? "bg-green-600" : "bg-gray-400"
+            className={`absolute -left-[9px] top-2 h-4 w-4 rounded-full ${
+              i === 0 ? "bg-green-600" : "bg-gray-400"
             }`}
           />
 
-          <div className="rounded-lg border p-4 bg-background shadow-sm">
-            <div className="flex justify-between items-center">
-              <h4 className="font-semibold text-lg">
-                {item.salary.toLocaleString()} SAR
+          <div className="border rounded-lg p-4">
+            <div className="flex justify-between">
+              <h4 className="font-semibold">
+                {s.totalSalary.toLocaleString()} SAR
               </h4>
               <span className="text-xs text-muted-foreground">
-                {format(new Date(item.effectiveFrom), "dd MMM yyyy")}
+                {format(new Date(s.effectiveFrom), "dd MMM yyyy")}
               </span>
             </div>
 
-            {item.reason && (
-              <p className="mt-2 text-sm text-muted-foreground">
-                {item.reason}
-              </p>
+            <ul className="mt-2 text-sm text-muted-foreground">
+              <li>Basic: {s.basicSalary}</li>
+              <li>Housing: {s.housingAllowance}</li>
+              <li>Transport: {s.transportationAllowance}</li>
+              <li>Food: {s.foodAllowance}</li>
+              <li>Mobile: {s.mobileAllowance}</li>
+              <li>Other: {s.otherAllowance}</li>
+            </ul>
+
+            {s.reason && (
+              <p className="mt-2 text-xs text-muted-foreground">{s.reason}</p>
             )}
 
-            {index === 0 && (
+            {i === 0 && (
               <span className="inline-block mt-2 text-xs px-2 py-1 rounded bg-green-100 text-green-700">
-                Current Salary
+                Current
               </span>
             )}
           </div>
