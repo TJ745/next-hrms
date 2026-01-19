@@ -1,5 +1,8 @@
 "use client";
-import { updateEmployeeAction } from "@/actions/employee.actions";
+import {
+  getManagersAction,
+  updateEmployeeAction,
+} from "@/actions/employee.actions";
 import { getJobTitleAction } from "@/actions/jobtitle.actions";
 import { getShiftsAction } from "@/actions/shift.action";
 import { Button } from "@/components/ui/button";
@@ -19,6 +22,7 @@ import { Pencil, Save, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import AssignManager from "./AssignManager";
 
 type GeneralFormProps = {
   employee: Employee & {
@@ -28,9 +32,17 @@ type GeneralFormProps = {
       company: Company | null;
     };
   };
+  employeeId: string;
+  currentManagerId?: string | null;
+  managers: any[];
 };
 
-function JobForm({ employee }: GeneralFormProps) {
+function JobForm({
+  employee,
+  employeeId,
+  currentManagerId,
+  managers = [],
+}: GeneralFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
@@ -39,10 +51,14 @@ function JobForm({ employee }: GeneralFormProps) {
   const [workingHours, setWorkingHours] = useState<any[]>([]);
   const [workingHour, setWorkingHour] = useState(employee.workingHours || "");
   const [shiftId, setShiftId] = useState(employee.shiftId || "");
+  // const [managers, setManagers] = useState<any[]>([]);
+  const [manager, setManager] = useState(currentManagerId || "");
+  // const managers = await getManagersAction();
 
   useEffect(() => {
     getJobTitleAction().then(setJobTitles);
     getShiftsAction().then(setWorkingHours);
+    // getManagersAction().then(setManagers);
   }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -79,7 +95,7 @@ function JobForm({ employee }: GeneralFormProps) {
       ? (() => {
           const end = new Date(joinDate);
           end.setFullYear(
-            end.getFullYear() + Number(employee.contractValidity)
+            end.getFullYear() + Number(employee.contractValidity),
           );
           return end.toISOString().split("T")[0];
         })()
@@ -208,9 +224,30 @@ function JobForm({ employee }: GeneralFormProps) {
                 <Label className="w-[140px] text-muted-foreground">
                   Direct Manager
                 </Label>
-                <span className="text-sm text-right text-foreground font-medium truncate">
-                  {employee.user.name}
-                </span>
+                {isEditing ? (
+                  <Select
+                    name="managerId"
+                    value={manager ?? "none"}
+                    onValueChange={setManager}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Manager" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem value="none">No Manager</SelectItem>
+                      {managers.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.user.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className="text-sm font-medium">
+                    {employee.manager?.user.name || "-"}
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center ">
@@ -388,7 +425,7 @@ function JobForm({ employee }: GeneralFormProps) {
                   </Select>
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {employee.workingHours || "-"}
+                    {employee.shift?.name || "-"}
                   </span>
                 )}
               </div>

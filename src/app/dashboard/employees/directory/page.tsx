@@ -6,7 +6,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { SlashIcon } from "lucide-react";
-import React from "react";
 
 import { EmployeeCard } from "./EmployeeCard";
 import { getEmployeesAction } from "@/actions/employee.actions";

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Pencil, Save, X } from "lucide-react";
+import { updateEmployeeAction } from "@/actions/employee.actions";
 
 type Props = {
   employee: Employee & { salaryHistory: SalaryHistory[] };
@@ -22,7 +23,9 @@ export default function PayrollForm({ employee }: Props) {
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
-  const currentSalary = employee.salaryHistory[0]; // latest
+  // const currentSalary = employee.salaryHistory[0]; // latest
+  const currentSalary =
+    employee.salaryHistory?.length > 0 ? employee.salaryHistory[0] : null;
   const effectiveDate = currentSalary?.effectiveFrom
     ? new Date(currentSalary.effectiveFrom).toISOString().split("T")[0]
     : "";
@@ -47,10 +50,32 @@ export default function PayrollForm({ employee }: Props) {
       setIsEditingSalary(false);
     }
   }
+
+  async function handleSubmitBank(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
+    setIsPending(true);
+
+    const formData = new FormData(e.target as HTMLFormElement);
+    const { error } = await updateEmployeeAction(formData);
+
+    if (error) {
+      toast.error(error);
+      setIsPending(false);
+    } else {
+      toast.success("Employee updated successfully.");
+      router.refresh();
+      setIsPending(false);
+
+      setIsEditingBank(false);
+      setIsEditingSalary(false);
+    }
+  }
+
   return (
     <div>
       <Card className="mt-4">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmitBank}>
           <CardHeader className="flex items-center justify-between h-2">
             <CardTitle>Bank Info</CardTitle>
             {isEditingBank ? (
@@ -186,14 +211,14 @@ export default function PayrollForm({ employee }: Props) {
                 {isEditingSalary ? (
                   <Input
                     name="basicSalary"
-                    defaultValue={currentSalary.basicSalary || ""}
+                    defaultValue={currentSalary?.basicSalary ?? 0}
                     disabled={!isEditingSalary}
                     type="number"
                     required
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {currentSalary.basicSalary || "-"}
+                    {currentSalary?.basicSalary || "-"}
                   </span>
                 )}
               </div>
@@ -204,13 +229,13 @@ export default function PayrollForm({ employee }: Props) {
                 {isEditingSalary ? (
                   <Input
                     name="housingAllowance"
-                    defaultValue={currentSalary.housingAllowance || ""}
+                    defaultValue={currentSalary?.housingAllowance ?? 0}
                     disabled={!isEditingSalary}
                     type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {currentSalary.housingAllowance || "-"}
+                    {currentSalary?.housingAllowance || "-"}
                   </span>
                 )}
               </div>
@@ -221,13 +246,13 @@ export default function PayrollForm({ employee }: Props) {
                 {isEditingSalary ? (
                   <Input
                     name="transportationAllowance"
-                    defaultValue={currentSalary.transportationAllowance || ""}
+                    defaultValue={currentSalary?.transportationAllowance ?? 0}
                     disabled={!isEditingSalary}
                     type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {currentSalary.transportationAllowance || "-"}
+                    {currentSalary?.transportationAllowance || "-"}
                   </span>
                 )}
               </div>
@@ -238,13 +263,13 @@ export default function PayrollForm({ employee }: Props) {
                 {isEditingSalary ? (
                   <Input
                     name="foodAllowance"
-                    defaultValue={currentSalary.foodAllowance || ""}
+                    defaultValue={currentSalary?.foodAllowance ?? 0}
                     disabled={!isEditingSalary}
                     type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {currentSalary.foodAllowance || "-"}
+                    {currentSalary?.foodAllowance || "-"}
                   </span>
                 )}
               </div>
@@ -255,13 +280,13 @@ export default function PayrollForm({ employee }: Props) {
                 {isEditingSalary ? (
                   <Input
                     name="mobileAllowance"
-                    defaultValue={currentSalary.mobileAllowance || ""}
+                    defaultValue={currentSalary?.mobileAllowance ?? 0}
                     disabled={!isEditingSalary}
                     type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {currentSalary.mobileAllowance || "-"}
+                    {currentSalary?.mobileAllowance || "-"}
                   </span>
                 )}
               </div>
@@ -272,13 +297,13 @@ export default function PayrollForm({ employee }: Props) {
                 {isEditingSalary ? (
                   <Input
                     name="otherAllowance"
-                    defaultValue={currentSalary.otherAllowance || ""}
+                    defaultValue={currentSalary?.otherAllowance ?? 0}
                     disabled={!isEditingSalary}
                     type="number"
                   />
                 ) : (
                   <span className="text-sm text-right text-foreground font-medium truncate">
-                    {currentSalary.otherAllowance || "-"}
+                    {currentSalary?.otherAllowance || "-"}
                   </span>
                 )}
               </div>
@@ -288,7 +313,7 @@ export default function PayrollForm({ employee }: Props) {
                 </Label>
 
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {currentSalary.totalSalary || "-"}
+                  {currentSalary?.totalSalary || "-"}
                 </span>
               </div>
             </div>
@@ -319,14 +344,14 @@ export default function PayrollForm({ employee }: Props) {
               {isEditingSalary ? (
                 <Input
                   name="reason"
-                  defaultValue={currentSalary.reason || ""}
+                  defaultValue={currentSalary?.reason || ""}
                   disabled={!isEditingSalary}
                   type="text"
                   required
                 />
               ) : (
                 <span className="text-sm text-right text-foreground font-medium truncate">
-                  {currentSalary.reason || "-"}
+                  {currentSalary?.reason || "-"}
                 </span>
               )}
             </div>

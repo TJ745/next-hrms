@@ -59,11 +59,11 @@ CRUD Employee (Admin/HR) ✅
 Assign:
 Department ✅
 Shift ✅
-Manager
-SalaryHistory
-Documents
-Upload documents (file → cloud storage like S3 / Vercel Blob)
-Show employee profile (include documents, salary history, manager, team)
+Manager ✅
+SalaryHistory ✅
+Documents ✅
+Upload documents local ✅ (file → cloud storage like S3 / Vercel Blob)
+Show employee profile (include documents, salary history, manager, team) ✅
 
 
 

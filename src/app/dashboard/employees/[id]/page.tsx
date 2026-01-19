@@ -14,15 +14,20 @@ import GeneralFrom from "./GeneralFrom";
 import JobForm from "./JobForm";
 import PayrollForm from "./PayrollForm";
 import DocumentsForm from "./DocumentsForm";
-import { getEmployeeAction } from "@/actions/employee.actions";
+import {
+  getEmployeeAction,
+  getManagersAction,
+} from "@/actions/employee.actions";
 import EmpImage from "./EmpImage";
 import Image from "next/image";
 import MedicalForm from "./MedicalForm";
 import SalaryHistoryForm from "./SalaryHistoryForm";
+import ManagerTeamTab from "./ManagerTeamForm";
 
 export default async function page({ params }: { params: { id: string } }) {
   const { id } = await params;
   const employee = await getEmployeeAction(id);
+  const managers = await getManagersAction();
 
   // ✅ Handle missing employee gracefully
   if (!employee) {
@@ -68,7 +73,7 @@ export default async function page({ params }: { params: { id: string } }) {
             <div className="col-span-1 bg-primary-foreground rounded-xl">
               <Card className="flex flex-col items-center text-center shadow-sm transition hover:shadow-md h-full">
                 <Image
-                  src={employee.image || "/avatar.png"}
+                  src={employee.image || "/image/default.jpg"}
                   alt="Employee Image"
                   width={100}
                   height={100}
@@ -135,6 +140,7 @@ export default async function page({ params }: { params: { id: string } }) {
                   <TabsTrigger value="job">Job</TabsTrigger>
                   <TabsTrigger value="payroll">Payroll</TabsTrigger>
                   <TabsTrigger value="salary">Salary History</TabsTrigger>
+                  <TabsTrigger value="manager-team">Manager & Team</TabsTrigger>
                   <TabsTrigger value="medical">Medical</TabsTrigger>
                   <TabsTrigger value="documents">Documents</TabsTrigger>
                 </TabsList>
@@ -144,7 +150,12 @@ export default async function page({ params }: { params: { id: string } }) {
                 </TabsContent>
 
                 <TabsContent value="job">
-                  <JobForm employee={employee} />
+                  <JobForm
+                    employee={employee}
+                    employeeId={employee.id}
+                    currentManagerId={employee.managerId}
+                    managers={managers}
+                  />
                 </TabsContent>
 
                 <TabsContent value="payroll">
@@ -153,6 +164,10 @@ export default async function page({ params }: { params: { id: string } }) {
 
                 <TabsContent value="salary">
                   <SalaryHistoryForm employee={employee} />
+                </TabsContent>
+
+                <TabsContent value="manager-team">
+                  <ManagerTeamTab employee={employee} />
                 </TabsContent>
 
                 <TabsContent value="medical">

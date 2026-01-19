@@ -15,14 +15,14 @@ export function downloadEmployeePDF(employees: EmployeeWithUser[]) {
     e.empId || "-",
     e.user?.name || "-",
     e.user.email || "-",
-    e.user.role || "-",
-    e.user.department?.name || "-",
+    e.jobTitle || "-",
+    e.department?.name || "-",
   ]);
 
   // Table
   autoTable(doc, {
     startY: 25,
-    head: [["Emp ID", "Name", "Email", "Role", "Department"]],
+    head: [["Emp ID", "Name", "Email", "Position", "Department"]],
     body: tableData,
     styles: {
       fontSize: 11,
